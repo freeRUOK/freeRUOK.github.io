@@ -20,16 +20,17 @@
     var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="poetry工具的配置和使用">
+  <meta name="description" content="本篇主要讲述了poetry依赖管理工具的配置和简单使用">
 <meta property="og:type" content="article">
 <meta property="og:title" content="poetry_II——配置和使用">
 <meta property="og:url" content="https://freeruok.github.io/2022/08/15/poetry-II/index.html">
 <meta property="og:site_name" content="freeRUOK">
-<meta property="og:description" content="poetry工具的配置和使用">
+<meta property="og:description" content="本篇主要讲述了poetry依赖管理工具的配置和简单使用">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-08-15T15:37:47.000Z">
-<meta property="article:modified_time" content="2022-08-15T17:16:24.251Z">
+<meta property="article:modified_time" content="2022-08-15T17:28:46.600Z">
 <meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="原创">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="https://freeruok.github.io/2022/08/15/poetry-II/">
@@ -211,10 +212,11 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-16 01:16:24" itemprop="dateModified" datetime="2022-08-16T01:16:24+08:00">2022-08-16</time>
+                <time title="修改时间：2022-08-16 01:28:46" itemprop="dateModified" datetime="2022-08-16T01:28:46+08:00">2022-08-16</time>
               </span>
 
           
+            <div class="post-description">本篇主要讲述了poetry依赖管理工具的配置和简单使用</div>
 
         </div>
       </header>
@@ -225,9 +227,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>poetry工具的配置和使用</p>
-<span id="more"></span>
-<h1 id="poetry配置和使用"><a href="#poetry配置和使用" class="headerlink" title="poetry配置和使用"></a>poetry配置和使用</h1><p>  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。  </p>
+        <h1 id="poetry配置和使用"><a href="#poetry配置和使用" class="headerlink" title="poetry配置和使用"></a>poetry配置和使用</h1><p>  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。  </p>
 <h3 id="配置缓存位置"><a href="#配置缓存位置" class="headerlink" title="配置缓存位置"></a>配置缓存位置</h3><p>  我们可以使用config命令来管理poetry配置，  比如：</p>
 <figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">poetry config --list # 列举所有配置条目</span><br><span class="line">注意每一个key的value， 我们需要额外注意如下几个key</span><br><span class="line">* cache-<span class="built_in">dir</span> # 缓存目录， 字符串 </span><br><span class="line">* virtualenvs.<span class="built_in">path</span> # 虚拟环境目录， 字符串 </span><br><span class="line">* virtualenvs.create # 是否使用虚拟环境， Boolean， 如果为真创建虚拟环境</span><br><span class="line">* virtualenvs.<span class="keyword">in</span>-project # 是否在项目目录下存放虚拟环境， Boolean， 如果为真在项目目录下的ven里创建虚拟环境</span><br><span class="line">* tool.poetry.source # 不可用， 也许以后通过这个能设置pypi源， 目前只能在pyproject.toml文件里手工写入了， 默认值null</span><br><span class="line"></span><br><span class="line">poetry config key # 单独查看key的值</span><br><span class="line">poetry config key value # 设置key的value</span><br><span class="line">poetry config unset key # key恢复默认</span><br></pre></td></tr></table></figure>
 
@@ -333,6 +333,9 @@
     
 
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8E%9F%E5%88%9B/" rel="tag"># 原创</a>
+          </div>
 
         
 
@@ -419,6 +422,10 @@
           <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">日志</span>
         </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
