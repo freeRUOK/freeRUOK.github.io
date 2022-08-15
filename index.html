@@ -207,7 +207,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-16 01:12:53" itemprop="dateModified" datetime="2022-08-16T01:12:53+08:00">2022-08-16</time>
+                <time title="修改时间：2022-08-16 01:16:24" itemprop="dateModified" datetime="2022-08-16T01:16:24+08:00">2022-08-16</time>
               </span>
 
           
@@ -221,106 +221,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>poetry工具的配置和使用<br>more</p>
-<h1 id="poetry配置和使用"><a href="#poetry配置和使用" class="headerlink" title="poetry配置和使用"></a>poetry配置和使用</h1><p>  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。  </p>
-<h3 id="配置缓存位置"><a href="#配置缓存位置" class="headerlink" title="配置缓存位置"></a>配置缓存位置</h3><p>  我们可以使用config命令来管理poetry配置，  比如：</p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">poetry config --list # 列举所有配置条目</span><br><span class="line">注意每一个key的value， 我们需要额外注意如下几个key</span><br><span class="line">* cache-<span class="built_in">dir</span> # 缓存目录， 字符串 </span><br><span class="line">* virtualenvs.<span class="built_in">path</span> # 虚拟环境目录， 字符串 </span><br><span class="line">* virtualenvs.create # 是否使用虚拟环境， Boolean， 如果为真创建虚拟环境</span><br><span class="line">* virtualenvs.<span class="keyword">in</span>-project # 是否在项目目录下存放虚拟环境， Boolean， 如果为真在项目目录下的ven里创建虚拟环境</span><br><span class="line">* tool.poetry.source # 不可用， 也许以后通过这个能设置pypi源， 目前只能在pyproject.toml文件里手工写入了， 默认值null</span><br><span class="line"></span><br><span class="line">poetry config key # 单独查看key的值</span><br><span class="line">poetry config key value # 设置key的value</span><br><span class="line">poetry config unset key # key恢复默认</span><br></pre></td></tr></table></figure>
-
-<p>  我们的poetry从网上下载模块后在本地缓存起来了， 这样下次使用的时候不用从网上下载直接用本地缓存的副本， 好处提高速度， 坏处就是占位置。。  </p>
-<p>  此外我们的项目环境也需要空间， 那么我们可以把环境放在项目目录下， 也可以集中放在虚拟环境目录下， 解释参见上面的key列表。</p>
-<p>  运行poetry config –list命令得知我们的默认缓存目录在，  </p>
-<p>  当前用户家目录下的\AppData\Local\pypoetry\Cache</p>
-<p>  默认虚拟环境目录在poetry缓存目录下的virtualenvs文件夹下， 也就是说所有项目的虚拟环境都集中存放在这里。  </p>
-<p>  如果你的C盘空间足够大， 那么我觉得没必要改变默认的配置， 直接使用就行， 如果你C盘空间比较紧张的话， 先把缓存目录； 虚拟环境目录都修改到D盘。</p>
-<p>  我们只要改变缓存目录就可以了， 因为虚拟环境目录引用了缓存目录， 类似于环境变量一样的效果， 只要更改缓存目录虚拟环境目录也跟着改变，  当然只要你愿意可以单独配置虚拟环境目录。  </p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">poetry config cache-<span class="built_in">dir</span> D:\cache\poetry-cache # 设置缓存目录</span><br><span class="line">poetry config --list # 查看所有配置条目</span><br></pre></td></tr></table></figure>
-
-<p>  这样以来我们的所有缓存文件都在D盘的cache\poetry-cache文件夹下了， 而虚拟环境目录在该目录的virtualenvs文件夹里， 如果哪天空间不够可以完全删除这些文件， 只要在你的项目里包含pyproject.toml文件就什么都不怕， 我们随时可以重新创建所有一切。  </p>
-<h3 id="pyproject-toml文件"><a href="#pyproject-toml文件" class="headerlink" title="pyproject.toml文件"></a>pyproject.toml文件</h3><p>  这个文件好像就像提货单， 只要这个文件在手随时随地都能重建开发环境， 当然poetry需要安装而且网络必须畅通。</p>
-<h4 id="pyproject-toml文件的结构"><a href="#pyproject-toml文件的结构" class="headerlink" title="pyproject.toml文件的结构"></a>pyproject.toml文件的结构</h4><p>  这个文件的内容有如下几个部分： </p>
-<ul>
-<li><p>项目信息， 比如名称; 版本; 简短描述； 作者； 维护者 </p>
-</li>
-<li><p>依赖项 可以是pypi元； 本地其他模块； 网络上的模块</p>
-</li>
-<li><p>开发阶段依赖项 在正式版本里不包含这些依赖项 </p>
-</li>
-<li><p>其他必要信息 比如 生成项目的工具； pypi元等等 </p>
-<p>原则上你不可手工修改这个文件， 但是我们配置pypi元还是需要修改文件的， “在地球上的部分地方写程序你需要掌握相关知识点学会使用相关工具之外， 你必须需要学会忍耐网络connect_error的耐心， 学会和各种网络错误做斗争， 最好系统的学习一下网络原理， 否则一肚子气， 无处发泄！”</p>
-<p>其实这里面的内容非常多， 列举两个重要主题 </p>
-</li>
-<li><p>版本约束 所谓版本约束就是某个依赖项最低是哪个版本； 最高是哪个版本， 特定的一个版本或者多个版本， 排除某些版本等等  举个例子有些软件还在使用sql server2003， 如果你用最新的pythonsql server模块显然不兼容的， 所以我们从python sql server模块历史版本里找到能正常调用sql server2003的历史版本， 作为版本约束写在pyproject.toml文件里， 这样以后这个项目能下载安装正确的依赖项版本  </p>
-</li>
-<li><p>依赖组 比如生成软件文档的某些依赖， 我们可以单独拿出来作为一个依赖组， 默认我们知道的有主要依赖组和开发依赖组但是没有文档依赖组， 那么我们完全可以自定义一个新的依赖组</p>
-</li>
-</ul>
-<h4 id="创建pyproject-toml文件"><a href="#创建pyproject-toml文件" class="headerlink" title="创建pyproject.toml文件"></a>创建pyproject.toml文件</h4><p>  我们可以使用new或者init命令都能创建这个文件， 但是两者有一些差别。  </p>
-<ul>
-<li><p>poetry new 项目名称 # 在当前文件夹下创建一个全新的项目， 生成最基本的项目布局和pyproject.toml文件, 自行创建项目文件夹， 没有交互会话</p>
-</li>
-<li><p>poetry init # 在当前文件夹下创建pyproject.toml文件， 不会自行创建项目文件夹， 假定你的项目已经存在， 而且当前文件夹是你项目的根目录， 用户需要回答几个问题  </p>
-<p>哪种方式都一样创建pypoetry.toml文件， 如果想要接管已经存在的项目用init命令， 如果新建项目用new命令就可以了。</p>
-<p>如果init的时候遇见两个问题， 一律选择n， 默认答案是y， 如果你选择y在网上搜索包特别慢， 特别慢， 第三个问题记得选择y， 要不然前面的都白干了， 当然也完全可以一路回车也行。</p>
-</li>
-</ul>
-<p>第一个问题： Would you like to define your main dependencies interactively? (yes&#x2F;no) [yes]<br>第二个问题： Would you like to define your development dependencies interactively? (yes&#x2F;no) [yes]<br>  init请自行探索！  </p>
-<p>  这里我们用new命令 ：</p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">&gt;poetry new  baidu-hot</span><br><span class="line">Created package baidu_hot <span class="keyword">in</span> baidu-hot</span><br></pre></td></tr></table></figure>
-<p>  我们可以看到这个目录下生成了pyproject.toml文件和其他一些文件夹和文件， 至于要不要用这些文件决定权在于我们， 这里我们删掉了除了pyproject.toml文件之外的所有文件。  </p>
-<h4 id="配置pypi元"><a href="#配置pypi元" class="headerlink" title="配置pypi元"></a>配置pypi元</h4><p>  这里我们说的非常热闹， 但是我们还没有创建真正的开发环境， 在此之前需要配置pypi元， 有人说poetry直接能调用全局pypi元， 可惜我这边不行。  </p>
-<p>  此外配置用户家目录\appdata\Roaming\pypoetry\config.toml文件也没有起效， 不知道哪里的问题。  </p>
-<p>  所以无奈之下只能把如下内容追加到pyproject.toml文件的末尾， </p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#设置poetry包管理工具的自定义pypi镜像源配置</span><br><span class="line">[[tool.poetry.source]]</span><br><span class="line">name = &quot;aliyun&quot;</span><br><span class="line">url = &quot;http://mirrors.aliyun.com/pypi/simple&quot;</span><br><span class="line">default = true</span><br></pre></td></tr></table></figure>
-
-<p>  接下来我们可以愉快的添加依赖项了， 用add命令： 绝大多数都是命令的输出， 我加上了适当的注释, 此外高版本的wx必须安装wxpython310。</p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="function">D:\<span class="title">Src</span>\<span class="title">python</span>\<span class="title">baidu</span>-<span class="title">hot</span>&gt;<span class="title">poetry</span> <span class="title">add</span> <span class="title">requests</span> <span class="title">lxml</span> <span class="title">bs4</span> <span class="title">wxpython310</span> # 一次可以添加多个模块， 用空格隔开</span></span><br><span class="line"><span class="function"><span class="title">Creating</span> <span class="title">virtualenv</span> <span class="title">baidu</span>-<span class="title">hot</span>-<span class="title">l</span>-<span class="title">IYpCe_</span>-<span class="title">py3</span>.10 <span class="title">in</span> <span class="title">D</span>:\<span class="title">cache</span>\<span class="title">poetry</span>-<span class="title">cache</span>\<span class="title">virtualenvs</span> # 创建虚拟环境</span></span><br><span class="line"><span class="function"># 下面是我们项目的依赖项， 给出了名称和版本</span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^2.28.1 <span class="title">for</span> <span class="title">requests</span></span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^4.9.1 <span class="title">for</span> <span class="title">lxml</span></span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^0.0.1 <span class="title">for</span> <span class="title">bs4</span></span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^4.1.2-<span class="title">alpha</span>.2 <span class="title">for</span> <span class="title">wxpython310</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Updating</span> <span class="title">dependencies</span></span></span><br><span class="line"><span class="function"><span class="title">Resolving</span> <span class="title">dependencies</span>... # 这里慢慢等， 解析依赖的时间比较长， 官方的解释是， 因为每一个模块的数据格式都不统一， 需要大量的分析， 暂时无解， 也许未来找到解决方案</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Writing</span> <span class="title">lock</span> <span class="title">file</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Package</span> <span class="title">operations</span>: 23 <span class="title">installs</span>, 0 <span class="title">updates</span>, 0 <span class="title">removals</span> # 你看就这么个小项目一共需要安装23个依赖项</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># 需要安装的所有依赖项</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pyparsing</span> (3.0.9)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">soupsieve</span> (2.3.2.<span class="title">post1</span>)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">atomicwrites</span> (1.4.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">attrs</span> (22.1.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">certifi</span> (2022.6.15)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">charset</span>-<span class="title">normalizer</span> (2.1.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">colorama</span> (0.4.5)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">beautifulsoup4</span> (4.11.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">idna</span> (3.3)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">numpy</span> (1.23.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pillow</span> (9.2.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pluggy</span> (0.13.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">more</span>-<span class="title">itertools</span> (8.14.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">packaging</span> (21.3)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">py</span> (1.11.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">six</span> (1.16.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">urllib3</span> (1.26.11)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">wcwidth</span> (0.2.5)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">bs4</span> (0.0.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">lxml</span> (4.9.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">wxpython310</span> (4.1.2<span class="title">a2</span>)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pytest</span> (5.4.3)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">requests</span> (2.28.1)</span></span><br></pre></td></tr></table></figure>
-
-<p>  终于把需要的环境都安装妥当了， 接下来开始真正的着手开发我们的软件。  </p>
-<p>  不过在此之前， 还需要看看我们的项目目录， 发现新生成了一个文件叫poetry.lock, 这是一把锁， 可以用文本编辑器打开瞧一瞧， 里面都是什么玩意.  </p>
-<p>  这里面记录了poetry分析报告， 换句话说poetry通过pyproject.toml文件来分析给出poetry.lock这个结果文件。  </p>
-<p>  那么问题来了， 我们的pyproject.toml文件里已经列举了所有的依赖项， 那么多出一个poetry.lock文件有什么用？  </p>
-<ul>
-<li><p>提高效率，我们知道poetry分析依赖关系很慢， 官方自己也承认， 如果有这个锁定文件那么不用第二次分析依赖关系， 直接从锁定文件里拿来使用就可以了  </p>
-</li>
-<li><p>版本锁定 任何一个活跃的依赖项都一直在开发， 一直在发布新版本， 那么你的项目依赖某个依赖项的特定版本， 如果安装的不是这个版本， 而是最新版本， 那么我们的项目就很有可能出现问题了， 如果直接锁定某个版本不会因为依赖项的版本更迭而影响到我们的项目。    </p>
-</li>
-<li><p>保证团队开发环境相同， 有这个锁定文件能确保项目组的所有人员都在相同的开发环境上工作， 团队的虚拟python环境一样， 团队的依赖项也相同  </p>
-<p>所以结论， pyproject.toml决定大政方针， 而poetry.lock文件规定实施细则。  </p>
-<p>有没有觉得心里爽， 我们用pyproject.toml文件决定最基本的方向， 我需要哪些模块， 这些模块是哪个版本的， 然后poetry根据你的要求分析生成了具体的计划书， 这个模块用这个版本， 而且这个模块也依赖其他这些模块。 锁定文件里也记录了依赖项文件的哈希值。</p>
-</li>
-</ul>
-<h3 id="实际体验"><a href="#实际体验" class="headerlink" title="实际体验"></a>实际体验</h3><p>  代码不多， 直接在项目目录下创建一个app.py文件， 内容如下：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># --*-- Encoding: UTF-8 --*--</span></span><br><span class="line"><span class="comment">#! filename: baidu_hot/app.py</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在列表框上显示百度热搜</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> wx</span><br><span class="line"><span class="keyword">import</span> bs4</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">downloadBaiduHot</span>():</span><br><span class="line">  <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    returns 热搜标题列表</span></span><br><span class="line"><span class="string">  &#x27;&#x27;&#x27;</span></span><br><span class="line">  results = <span class="literal">None</span></span><br><span class="line">  url = <span class="string">&quot;http://www.baidu.com/&quot;</span></span><br><span class="line">  headers = &#123;<span class="string">&quot;user-agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71&quot;</span>&#125;</span><br><span class="line">  response = requests.get(url, headers=headers)</span><br><span class="line">  <span class="keyword">if</span> response.ok:</span><br><span class="line">    soup = bs4.BeautifulSoup(response.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">    results = []</span><br><span class="line">  <span class="comment"># 留意select函数的返回类型</span></span><br><span class="line">    <span class="keyword">for</span> element <span class="keyword">in</span> soup.select(<span class="string">&quot;.s-hotsearch-content&quot;</span>)[<span class="number">0</span>]:</span><br><span class="line">      results.append(element.text)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> results</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">  app = wx.App()</span><br><span class="line">  results = downloadBaiduHot()</span><br><span class="line">  <span class="keyword">if</span> results <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    wx.MessageBox(<span class="string">&quot;加载失败&quot;</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 先创建一个窗口或者叫框架， 然后在这个框架里放置一个面板， 在把列表框放到这个面板上， 否则的话tab键没有焦点</span></span><br><span class="line">  frame = wx.Frame(<span class="literal">None</span>, title=<span class="string">&quot;百度热搜&quot;</span>)</span><br><span class="line">  panel = wx.Panel(frame)</span><br><span class="line">  listBox = wx.ListBox(panel)</span><br><span class="line">  listBox.<span class="type">Set</span>(results)</span><br><span class="line">  frame.Show()</span><br><span class="line">  app.MainLoop()</span><br></pre></td></tr></table></figure>
-
-<h4 id="运行项目"><a href="#运行项目" class="headerlink" title="运行项目"></a>运行项目</h4><p>  这个时候我们首先需要进入项目虚拟环境下， 如果在你的全局环境下已经有lxml; requests; bs4和wxpython那么先卸载掉这些模块， 以便于我们测试虚拟环境。  </p>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">python app.py</span><br><span class="line">报错, importError</span><br><span class="line">poetry shell</span><br><span class="line">python app.py</span><br><span class="line"># 成功运行</span><br></pre></td></tr></table></figure>
-
-<p>  所以实际运行项目之前不要忘了先进入到虚拟环境下， 退出虚拟环境用exit就可以了。  </p>
-<p>  到目前为止我们的项目下有三个文件， 我们简单梳理一下：</p>
-<ul>
-<li><p>app.py 项目代码  </p>
-</li>
-<li><p>pyproject.toml poetry依赖管理描述文件</p>
-</li>
-<li><p>poetry.lock poetry锁定文件， 能有效的提高解析速度  </p>
-<p>此外我们的项目依赖项缓存在d:\cache\poetry-cache\目录下， 我们的虚拟环境包括依赖项都在d:\cache\poetry-cache\Virtualenvs\项目名称-python版本\下。  </p>
-<p>如果你因为各种原因重建项目环境， 比如清理磁盘删掉了依赖项缓存或者整个环境， 买了新电脑了， 那么可以使用，</p>
-</li>
-</ul>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> 项目目录 # 这里必须存在pyproject.toml文件</span><br><span class="line">poetry install</span><br></pre></td></tr></table></figure>
-
-<p>  这样的话可以重新安装你的项目环境了。  </p>
-<p>当然据说可以单独配置某个项目， 方法就是在当前项目根目录下放一个config.toml文件。 </p>
-<p>  其他更多用法请自行探索， 此外文末留下一些参考主题， 大家可以进一步探索， 本篇只是带你感性的认识一下依赖管理这样一个主题， 要想真正的使用还是需要系统的学习的。</p>
-<ul>
-<li><p>(语义化版本 2.0.0)[<a target="_blank" rel="noopener" href="https://semver.org/lang/zh-CN/]">https://semver.org/lang/zh-CN/]</a></p>
-</li>
-<li><p>(poetry)[<a target="_blank" rel="noopener" href="https://github.com/python-poetry/poetry]">https://github.com/python-poetry/poetry]</a></p>
-</li>
-<li><p>(pipx)[<a target="_blank" rel="noopener" href="https://github.com/pypa/pipx]">https://github.com/pypa/pipx]</a></p>
-</li>
-</ul>
-
+          <p>poetry工具的配置和使用</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/08/15/poetry-II/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -370,7 +279,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-16 01:12:24" itemprop="dateModified" datetime="2022-08-16T01:12:24+08:00">2022-08-16</time>
+                <time title="修改时间：2022-08-16 01:16:12" itemprop="dateModified" datetime="2022-08-16T01:16:12+08:00">2022-08-16</time>
               </span>
 
           
@@ -384,70 +293,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>软件项目依赖管理和python语言的依赖管理现状介绍<br>more</p>
-<h2 id="依赖管理介绍"><a href="#依赖管理介绍" class="headerlink" title="依赖管理介绍"></a>依赖管理介绍</h2><p>  在编写程序的时候我们的软件项目需要源代码管理， 最好的源代码管理工具应该是git， 所以特别值得大家学习使用……</p>
-<p>  关于git的主题比较大， 这次我们说另外一个重要主题依赖管理！  </p>
-<h3 id="什么是依赖管理"><a href="#什么是依赖管理" class="headerlink" title="什么是依赖管理"></a>什么是依赖管理</h3><p>  在实际编写程序的过程中我们的项目需要依赖其他若干个已经存在的模块， 在这些模块的基础上进一步的开发， 就像搭积木一样， </p>
-<p>这些模块已经是其他人开发完成的， 我们直接拿来使用就可以了， 所以这些模块都被形象的称之为轮子！  </p>
-<p>请注意， 这里的模块是python里的说法， 在其他语言有其他语言的术语， 比如软件包； 类库； 函数库； 组件； API等等。</p>
-<h4 id="轮子自给自足还是拿来主义"><a href="#轮子自给自足还是拿来主义" class="headerlink" title="轮子自给自足还是拿来主义"></a>轮子自给自足还是拿来主义</h4><p>  那么轮子能不能自己实现， 完全不去调用其他人的代码？  </p>
-<p>  理论上你完全可以在一个裸机上从零开始创造你的软件帝国， 但是需要的知识； 时间和经历那是不可想象的， </p>
-<p>所以有人感慨“人生苦短我用python！”</p>
-<p>从这句话可见计算机软件系统的庞大和复杂！  </p>
-<p>  轮子自给自足或者拿来使用， 这里面的取舍可以自行考虑， 比如说你的目的是开发爬虫程序， 那么你手写html解析器是不太明智的， 反而直接使用专门解析html的轮子提高你的工作效率。 </p>
-<p>  如果你想要学习数据结构只会调用个线程的html解析模块没有太大意义， 反而需要手工实现一个html解析器， 哪怕你实现的版本方方面面连人家的的1%都不如， 但是你从这个过程里学到很多东西……</p>
-<p>  所以自己造轮子还是用已经存在的这是一个取舍问题， 主要看你的目的， 任何问题都不可片面的看待， 还是需要辩证的看待问题。  </p>
-<h3 id="轮子从哪里找"><a href="#轮子从哪里找" class="headerlink" title="轮子从哪里找"></a>轮子从哪里找</h3><p>  我们的操作系统给你提供了直接能使用的轮子， 比如说， 我们可以调用win32api直接可以编写功能强大的windows应用程序， 同样的道理我们可以在浏览器上通过h5； js和css创建网页， 在手机上通过Android api创建移动app。</p>
-<p>  此外编程语言自带子弹， 比如说我们的c语言提供了很多方便好用的标准函数库， 这个方面最能吹的应该是golang， golang号称很多事情标准库都能找到合适的轮子， 对第三方依赖很少， 当然我觉得这里的水分还是比较大， 听一听就行了。</p>
-<p>  还有一些成体系的生态也提供了大量的轮子， 比如Java语言的jvm平台， 微软的dotnet平台等等。 </p>
-<p>  此外就是第三方提供的轮子了， 有的收费， 有的免费， 当然免费也有它的约束力， 不是说免费使用轮子能够为所欲为的！ 需要遵守许可协议， 当然这些许可证就是在道德上约束你， 如果你非要违反许可协议那也没办法。 </p>
-<p>  扯了那么多， 总结一下， 轮子要么使用自带的子弹， 要么从第三方平台上找。 比如GitHub这样的代码托管网站， pip这样的某种编程语言的集中管理模块的平台等等。</p>
-<p>如果继续扯下去话题肯定是跑偏的， 总而言之， 我们需要知道轮子无处不在， 这些轮子大体上分为两类， 自带的轮子和第三方轮子。 我们依赖管理主要解决的就是第三方轮子之间的相互关系。</p>
-<p>实际举例，  </p>
-<p>一个实时显示百度热搜榜的应用程序需要如下几个其他开发者提供的模块。</p>
-<ul>
-<li><p>requests 号称最友好的http请求库， 用这个从百度的服务器上获取内容 </p>
-</li>
-<li><p>bs4 html解析库 从百度服务器上返回的是html， 我们需要解析获取到对我们有用的信息， 俗称 洗数据 </p>
-</li>
-<li><p>lxml 可选 效率非常高的xml解析器 bs4通过这个库来解析html文档， python默认的性能比较低下</p>
-</li>
-</ul>
-<p>wxpython 图形用户界面开发库 实际内容通过用户界面来展示 </p>
-<p>  一个小小的项目都需要四个依赖模块， 所以有人调侃说《你一个项目不依赖个几个其他库， 都不叫一个完整的项目了！》， 如果遇到中等项目或者更大的项目手工管理依赖模块是不可想象的。 </p>
-<h4 id="依赖管理具体工作内容"><a href="#依赖管理具体工作内容" class="headerlink" title="依赖管理具体工作内容"></a>依赖管理具体工作内容</h4><p>  手工依赖管理不光光是数量的问题， 还有版本， 依赖模块的依赖模块； 开发环境和生产环境问题等等， 具体而言</p>
-<p>a模块的某个版本只能兼容b模块的某个特定版本，而且你依赖的四个模块也许他们也依赖其他模块， 在开发阶段需要用到一些模块， 但是在生产环境上就不需要这些模块， 这样问题就变得特别复杂，  所以说依赖管理应该是非常重要的。  </p>
-<p>所以我们必须使用工具来完成如上几个工作！  </p>
-<h3 id="python依赖管理的现状"><a href="#python依赖管理的现状" class="headerlink" title="python依赖管理的现状"></a>python依赖管理的现状</h3><p>  说起python的依赖管理那真是群魔乱舞； 各显神通， 好不热闹。 </p>
-<p>我们最开始接触到的是pip， 动不动就pip install package_name应该是轻车熟路了， 但是这些模块都是全局安装的， 不利于精细化依赖管理。 </p>
-<p>后来升级到了requirements.txt文件， 所有的依赖模块的名称和版本都保存到这个文件里， 能够批量安装了， 这样我们不需要一个一个的安装依赖包了。 </p>
-<p>  但是问题是所有的模块都安装在一个全局环境的话也许带来不可意料到的事情， 好比你学会了许许多多的武功， 但是有些武功可能相互冲突直接就走火入魔了呢！  </p>
-<p>  下一个阶段出现了python虚拟环境virtualenv， 这个可以把系统的python环境和多个虚拟python环境隔离开， 这样这些虚拟环境相互隔离， 独立运行， 每个环境安装的模块不同， 也不会相互施加副作用， 虚拟环境和pip合体确实简化了很多工作， 但不是完美的方案……  </p>
-<p>pipenv是另外一个尝试解决python依赖管理的工具链， python官方也推荐过， 不过据说也有一些缺陷， 具体情况不得而知了。</p>
-<p>  我们知道python号称胶水语言， 各种各样的模块众多， 但是我们从上面的叙述当中可以看到至今也没有一个统一的依赖管理工具链， 可以说是乱七八糟； 五花八门， 实在让人无从下手……  </p>
-<p>  我试着去学习使用一些python工具链， 可惜没有一个让我满意的， 就像男女之情一样， 如果对某个异性没有感觉就是没有感觉， 在怎么锲而不舍也无济于事， 直到遇见<br>(poetry)[<a target="_blank" rel="noopener" href="https://github.com/python-poetry/poetry]">https://github.com/python-poetry/poetry]</a><br>！  </p>
-<h3 id="poetry介绍"><a href="#poetry介绍" class="headerlink" title="poetry介绍"></a>poetry介绍</h3><p>  poetry最大的优点是简单直接， 基本上把整个python项目管理工具链都整合在一起了， 比如依赖管理； 虚拟环境管理和模块打包发布等等， 只要在你的项目里包含一个pyproject.toml文件， 那么你完全可以在任何环境重建你的项目， 而且重建的过程和第一次丝毫不差， 就像回放操作一样， 这里最大的不确定因素是python本身的版本问题。  </p>
-<p>至于如何在一个系统下让多个python和睦共处是我们下一个主题的内容了。  </p>
-<p>我们的poetry和rust编程语言的cargo工具一样， 所以poetry是python的cargo！  </p>
-<p>  当然如果有比poetry更好的工具， 你也可以出来介绍一下， 我这些也可以说是抛砖引玉……  </p>
-<h2 id="poetry安装"><a href="#poetry安装" class="headerlink" title="poetry安装"></a>poetry安装</h2><p>  安装总体上三种方式 </p>
-<ul>
-<li><p>脚本安装 通过curl这样的工具下载一个脚本， 然后这个脚本下载安装所需的所有文件， Linux bash Windows powerShell可以这样安装， 网络问题需要解决， 说起这些也是一把辛酸泪啊！！！  </p>
-</li>
-<li><p>通过pipx安装 我们这次就是这么干的， 另外官方不推荐pip安装， 主要是为了避免循环依赖  </p>
-</li>
-<li><p>离线包安装， 下载获取poetry的脚本， 获取离线安装包然后在安装， 具体说的话先下载curl下载的python脚本， 然后从poetry项目的发布页面上下载压缩包。</p>
-<p>这里我们pipx安装就可以了， 首先安装pipx</p>
-</li>
-</ul>
-<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">pip install pipx # 常规操作</span><br><span class="line">pipx install poetry # 安装poetry</span><br></pre></td></tr></table></figure>
-
-<p>打开一个新的命令提示符输入poetry看看输出结果。</p>
-<p>请注意如果没有找到poetry需要手动把poetry路径加入到path环境变量里， 具体路径是用户家目录.local\bin\</p>
-<p>到此为止我们就有了一个poetry工具。 </p>
-<p>下一次我们实际体验一下这个工具， 带着大家真正的实践一下， 到时候写一个简单获取百度热搜的程序。</p>
-<p>  关于安装有疑问下面提出来……</p>
-
+          <p>软件项目依赖管理和python语言的依赖管理现状介绍</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/08/15/poetry-I/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -497,7 +351,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-16 01:11:32" itemprop="dateModified" datetime="2022-08-16T01:11:32+08:00">2022-08-16</time>
+                <time title="修改时间：2022-08-16 01:16:00" itemprop="dateModified" datetime="2022-08-16T01:16:00+08:00">2022-08-16</time>
               </span>
 
           
@@ -511,75 +365,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>使用python编程语言实现2048游戏核心代码<br>more<br>  带着大家解析一下2048是如何被实现的， 后续有时间继续讲一讲pygame， wxpython这些的使用。<br>初学者乍一看感觉特别难， 实际上只要你认真看， 动手实现一下掌握核心实现还是比较容易的， 然后调用语音库朗读一下也就实现了2048。<br>2048的实现可谓八仙过海各显神通， 所以如下只是其中一个实现方式而已， 大家可以自行探索效率更高， 实现更简单的方法……<br>注意如果文字叙述不太理解的话直接看代码， 或者跳过去看下一段然后在回过头看不理解的段落！</p>
-<h3 id="起点"><a href="#起点" class="headerlink" title="起点"></a>起点</h3><p>  首先我们需要四个方向， 从game2048.py里查看代码：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">DIRECTION_UP = <span class="number">0</span></span><br><span class="line">DIRECTION_DOWN = <span class="number">1</span></span><br><span class="line">DIRECTION_LEFT = <span class="number">2</span></span><br><span class="line">DIRECTION_RIGHT = <span class="number">3</span></span><br></pre></td></tr></table></figure>
-
-<p>  我用最基本的一维数组做了2048的数据结构, 为了方便查看如此初始化。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Game</span>:</span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">    self.<span class="built_in">map</span> = [i + <span class="number">1</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">16</span>)]</span><br><span class="line">    self.rowLen = <span class="number">4</span></span><br></pre></td></tr></table></figure>
-<p>  这里面也就两个字段一个是从1到16的一个列表， 还有一个是每一行的长度。</p>
-<hr>
-<h3 id="铁三角函数定乾坤"><a href="#铁三角函数定乾坤" class="headerlink" title="铁三角函数定乾坤"></a>铁三角函数定乾坤</h3><h4 id="1-遍历方向和顺序"><a href="#1-遍历方向和顺序" class="headerlink" title="1.遍历方向和顺序"></a>1.遍历方向和顺序</h4><p>第一个函数.获取需要移动的所有数字的位置和顺序。</p>
-<p>我们的列表给人第一感觉是一个一字长蛇阵， 从0到15一个接着一个排过去， 但是我们用一个函数把这个一字长蛇阵改变成4乘4的方阵。<br>便利我们的方阵需要提供两个参数， 方向和行号。<br>方向很好理解， 无非就是从左至右； 从右至左； 从上到下和从下到上四种。  </p>
-<p>  所谓行号的含义是分两种情况。<br>如果方向是从左至右或者从右至左的话我们根据行号找到一个开始便利的下标点， 顺序取出四个下标就可以了。<br>根据行号取开始点很简单行号乘以行长： rowNum * rowLen<br>便利间隔就是1， 没什么好说的。<br>便利结束点也很好说， 开始点加上行长就可以了。<br>  如果便利方向是从上到下或从下到上的话情况就不太一样了， 这次便利间隔是行长rowLen。<br>便利开始点是行号，<br>结束点就是整个列表的长度。<br>如果方向是从右至左或者从下到上的话处理完毕后反转一下。<br>如下是该函数：  </p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_row_pointers</span>(<span class="params">self, direction, rowNum</span>):</span><br><span class="line">  allLen = <span class="built_in">len</span>(self.<span class="built_in">map</span>)</span><br><span class="line">  rowLen = self.rowLen</span><br><span class="line">  <span class="keyword">if</span> direction == DIRECTION_LEFT <span class="keyword">or</span> direction == DIRECTION_RIGHT:</span><br><span class="line">    begin = rowLen * rowNum</span><br><span class="line">    end = begin + rowLen</span><br><span class="line">    step = <span class="number">1</span></span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">    begin = rowNum</span><br><span class="line">    end = allLen</span><br><span class="line">    step = rowLen</span><br><span class="line"></span><br><span class="line">  pointers = [i <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(begin, end, step)]</span><br><span class="line">  <span class="keyword">if</span> direction == DIRECTION_DOWN <span class="keyword">or</span> direction == DIRECTION_RIGHT:</span><br><span class="line">    pointers.reverse()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> pointers</span><br></pre></td></tr></table></figure>
-<p>总体上很简单， 大家可以思考一下这里有没有可以优化的空间， ……</p>
-<h4 id="2-合并修改和移动"><a href="#2-合并修改和移动" class="headerlink" title="2.合并修改和移动"></a>2.合并修改和移动</h4><p>  第二个函数真正的把数字从一个点移动到另外一个点。</p>
-<p>  如果说第一个函数比较魔幻， 本来就是一字长蛇阵非要当成方方正正的队伍， 上下其手； 左右翻飞的话接下来就聚焦左邻右舍的一些鸡毛蒜皮的小事情了！<br>十六个位置有点多， 我们的大脑可能没有办法照顾到所有的成员了， 我们随便挑出两个相邻的位置来讨论……<br>整体思维很难， 但是我们如果把整体继续缩小在去考虑是不是简单了，  </p>
-<p>  我们查看左点和右点两个位置都发现什么？ 全部列举一下：</p>
-<ul>
-<li>两边都是空的 往前两步</li>
-<li>左边有数字 右边是空的 交换双方的位置 原地踏步</li>
-<li>左边是空的 右边有数字 往前一步</li>
-<li>两边都有数字， 而且都是相同的数字 把左边的数字加到右边的数字上； 左边设为零 原地踏步</li>
-<li>两边都是数字， 但两个数字不相同 往前走两步<br>如此我们基本找到了让数字动起来的奥秘，<br>此外这个函数的返回值表明下一次从哪里开始继续比较， 还是从原地开始或者， 往前走一步， 或往后退一步。<br>实现如下<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">mergeOne</span>(<span class="params">self, left, right</span>):</span><br><span class="line">  <span class="built_in">map</span> = self.<span class="built_in">map</span></span><br><span class="line">  <span class="keyword">if</span> <span class="built_in">map</span>[left] == <span class="number">0</span> <span class="keyword">and</span> <span class="built_in">map</span>[right] == <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">return</span> <span class="number">2</span></span><br><span class="line">  <span class="keyword">elif</span> <span class="built_in">map</span>[left] == <span class="number">0</span> <span class="keyword">and</span> <span class="built_in">map</span>[right] != <span class="number">0</span> <span class="keyword">or</span> <span class="built_in">map</span>[left] != <span class="number">0</span> <span class="keyword">and</span> <span class="built_in">map</span>[right] != <span class="number">0</span> <span class="keyword">and</span> <span class="built_in">map</span>[left] != <span class="built_in">map</span>[right]:</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">  <span class="keyword">elif</span>  <span class="built_in">map</span>[left] != <span class="number">0</span> <span class="keyword">and</span> <span class="built_in">map</span>[right] == <span class="number">0</span>:</span><br><span class="line">    <span class="built_in">map</span>[left], <span class="built_in">map</span>[right] = <span class="built_in">map</span>[right], <span class="built_in">map</span>[left]</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">map</span>[right] += <span class="built_in">map</span>[left]</span><br><span class="line">    <span class="built_in">map</span>[left] = <span class="number">0</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span></span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="3-连接上两座孤岛"><a href="#3-连接上两座孤岛" class="headerlink" title="3.连接上两座孤岛"></a>3.连接上两座孤岛</h4><p>  如果单独看上面的两个函数很难看明白其中的联系， 所以为了让我们的铁三角完整的联系在一起需要一个函数， 我们就叫move吧！</p>
-<p>  move函数做的事情很简单，就是调用上面两个函数， 如果你充分理解了上面两个函数的功能， 接下来的代码让你恍然大悟， 就几行代码如下</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">move</span>(<span class="params">self, direction</span>):</span><br><span class="line">  <span class="built_in">map</span> = self.<span class="built_in">map</span></span><br><span class="line">  <span class="keyword">for</span> rowNum <span class="keyword">in</span> <span class="built_in">range</span>(self.rowLen):</span><br><span class="line">    ps = self.get_row_pointers(direction, rowNum)</span><br><span class="line">    pos = <span class="number">0</span></span><br><span class="line">    <span class="keyword">while</span> pos &lt; <span class="built_in">len</span>(ps):</span><br><span class="line">      pos += self.merge(ps[pos], ps[pos + <span class="number">1</span>])</span><br></pre></td></tr></table></figure>
-
-<p>  到此为止2048整体股价算是搭建起来了，<br>但是数字从哪里来？ 如何判断game over？<br>如果这两个问题解决不了这个东西没有灵魂？<br>所以我们需要借尸还魂。</p>
-<h3 id="从无到有"><a href="#从无到有" class="headerlink" title="从无到有"></a>从无到有</h3><h4 id="1-生成数字"><a href="#1-生成数字" class="headerlink" title="1.生成数字"></a>1.生成数字</h4><p>  游戏如何从无到有生成数字， 答案肯定是随机数了！<br>在此之前我们稍微修改一下我们的主体程序， 给Game类添加一个属性, 这个属性是用来记录当前数字的个数的， 这个属性随着数字的增减而变化， 此外我们需要一个属性来表示游戏是否GAME_OVER, 别忘了修改map初始化。</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Game</span>:</span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">    ......</span><br><span class="line">    self.<span class="built_in">map</span> = [<span class="number">0</span> <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">16</span>)]</span><br><span class="line">    self.numCount = <span class="number">0</span></span><br><span class="line">    self.gameOver = <span class="literal">False</span></span><br><span class="line">    ......</span><br></pre></td></tr></table></figure>
-<p>这样我们还需修改merge函数， 在合并数字下面加上如下代码：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">.....</span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">map</span>[right] += <span class="built_in">map</span>[left]</span><br><span class="line">    <span class="built_in">map</span>[left] = <span class="number">0</span></span><br><span class="line">    self.numCount -= <span class="number">1</span></span><br><span class="line">    <span class="keyword">return</span> -<span class="number">1</span></span><br><span class="line">  .....</span><br></pre></td></tr></table></figure>
-<p>这样以来我们可以放心的编写生成随机数的函数了：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">make_random_number</span>(<span class="params">self</span>):</span><br><span class="line">  <span class="comment"># 如果没有位直接置返回</span></span><br><span class="line">  <span class="keyword">if</span> self.numCount &gt;= <span class="built_in">len</span>(self.<span class="built_in">map</span>):</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    rIndex = random.randint(<span class="number">0</span>, <span class="built_in">len</span>(self.<span class="built_in">map</span>) - <span class="number">1</span>) <span class="comment"># 随机选择一个位置</span></span><br><span class="line">    <span class="keyword">if</span> self.<span class="built_in">map</span>[rIndex] == <span class="number">0</span>:</span><br><span class="line">      self.<span class="built_in">map</span>[rIndex] = (<span class="number">2</span> <span class="keyword">if</span> random.randint(<span class="number">0</span>, <span class="number">9</span>) &lt; <span class="number">8</span> <span class="keyword">else</span> <span class="number">4</span>) <span class="comment"># 根据随机生成的数字决定生成2还是4， 这里4出现的概率比较低</span></span><br><span class="line">      self.numCount += <span class="number">1</span></span><br><span class="line">      <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
-
-<h4 id="2-判断是否gameOver"><a href="#2-判断是否gameOver" class="headerlink" title="2.判断是否gameOver"></a>2.判断是否gameOver</h4><p>判断是否gameOver也比较简单， 便利所有的数字， 如果相邻的数字全部不相同判定gameOver， 如下：<br>这里我们设置了一个属性， 当然也可以直接返回一个布尔值！</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">setGameOver</span>(<span class="params">self</span>):</span><br><span class="line">  <span class="keyword">if</span> self.numCount &lt; <span class="built_in">len</span>(self.<span class="built_in">map</span>):</span><br><span class="line">    <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">  <span class="built_in">map</span> = self.<span class="built_in">map</span></span><br><span class="line">  <span class="keyword">for</span> rowNum <span class="keyword">in</span> <span class="built_in">range</span>(self.rowLen):</span><br><span class="line">    leftPs, upPs = self.get_row_pointers(DIRECTION_LEFT, rowNum), self.get_row_pointers(DIRECTION_UP, rowNum)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, self.rowLen):</span><br><span class="line">      <span class="keyword">if</span> <span class="built_in">map</span>[leftPs[i - <span class="number">1</span>]] == <span class="built_in">map</span>[leftPs[i]] <span class="keyword">or</span> <span class="built_in">map</span>[upPs[i - <span class="number">1</span>]] == <span class="built_in">map</span>[upPs[i]]:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">  self.gameOver = <span class="literal">True</span></span><br></pre></td></tr></table></figure>
-<p>  到此为止我们的2048最核心的代码已经编写完毕， 也就五个函数而已总结一下：</p>
-<ul>
-<li><p>get_row_pointers 便利方向和顺序</p>
-</li>
-<li><p>merge 比较相邻的两个位置做相应的处理， 指明下一步从哪里开始， 多次调用可以达到移动； 合并数字的效果</p>
-</li>
-<li><p>move 按照某个方向移动方格上的所有数字</p>
-</li>
-<li><p>make_random_number 在一个空位置上生成2或4</p>
-</li>
-<li><p>setGameOver 设置游戏GAME_OVER状态</p>
-<p>核心也就这么多， 但是一个最关键的问题我们还没有解决， 如何和玩家交互？</p>
-</li>
-</ul>
-<p>如果是视觉交互的话这个是万里长征的第一步， 需要处理图片， 而这是大工程， 还好我们这些人不需要视觉元素。<br>那么如何高效的和玩家听觉交互， 我们的2048音频版应该给了一个不错的答案， 同志们可以参考2048音频版的源代码。<br>但是本文因为篇幅的限制没有办法解释2048音频版了， 太长我不想写， 而且没有多少人愿意看吧！<br>所以接下来我们写一个命令行版本测试我们的代码有没有问题！  </p>
-<h2 id="生成命令行版本的2048"><a href="#生成命令行版本的2048" class="headerlink" title="生成命令行版本的2048"></a>生成命令行版本的2048</h2><p> 命令行展示特别简单粗暴， 完全不需要最终用户的体验， 先清屏， 在打印， 当然这里我们没有考虑Linux平台， 如下所示：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">print</span>(<span class="params">self</span>):</span><br><span class="line">  os.system(<span class="string">&quot;cls&quot;</span>)</span><br><span class="line">  <span class="built_in">map</span> = self.<span class="built_in">map</span></span><br><span class="line">  allLen = <span class="built_in">len</span>(self.<span class="built_in">map</span>)</span><br><span class="line">  rowLen = self.rowLen</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(allLen):</span><br><span class="line">    <span class="keyword">if</span> (i + <span class="number">1</span>) % rowLen != <span class="number">0</span>:</span><br><span class="line">      <span class="built_in">print</span>(end=<span class="string">&quot;&#123;&#125; - &quot;</span>.<span class="built_in">format</span>(<span class="built_in">map</span>[i]))</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">      <span class="built_in">print</span>(end=<span class="string">&quot;&#123;&#125;\n&quot;</span>.<span class="built_in">format</span>(<span class="built_in">map</span>[i]))</span><br></pre></td></tr></table></figure>
-<p>  我们可以用python的msvcrt模块的getch方法获取用户的击键， 需要注意的是如果玩家按下的是功能键， 第一次调用返回\xe0， 第二次返回见代码。<br>还有一个需要注意的事情是玩家的操作和我们的开发方向上是相反的。<br>具体说的话， 比如我们调用：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">move(DIRECTION_LEFT)</span><br></pre></td></tr></table></figure>
-<p>这是从左至右的方向，<br>而玩家按下左方向键， 那么程序正确的反应是从右至左处理。<br>所以我们改动了符号常量表， 做了一点奇怪的事情：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">DIRECTION_UP = <span class="number">80</span></span><br><span class="line">DIRECTION_DOWN = <span class="number">72</span></span><br><span class="line">DIRECTION_LEFT = <span class="number">77</span></span><br><span class="line">DIRECTION_RIGHT = <span class="number">75</span></span><br><span class="line">CTRL_UP = DIRECTION_DOWN</span><br><span class="line">CTRL_DOWN = DIRECTION_UP</span><br><span class="line">CTRL_LEFT = DIRECTION_RIGHT</span><br><span class="line">CTRL_RIGHT = DIRECTION_LEFT</span><br><span class="line">CTRL_QUIT = <span class="built_in">ord</span>(<span class="string">&quot;q&quot;</span>)</span><br></pre></td></tr></table></figure>
-<p>有人可能觉得这个看着特别多此一举， 但是为了写代码的时候不出现逻辑混乱只能是这样写了, 要知道这些代码不是凭空出现的， 这个过程中需要调试， 修改等等。<br>当然你也完全可以这样写：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">DIRECTION_UP = <span class="number">72</span></span><br><span class="line">DIRECTION_DOWN = <span class="number">80</span></span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
-<p>然后接下来的工作就格外的顺利了， 最大最简单的函数：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">run</span>(<span class="params">self</span>):</span><br><span class="line">  self.make_random_number()</span><br><span class="line">  self.<span class="built_in">print</span>()</span><br><span class="line">  <span class="keyword">while</span> <span class="keyword">not</span> self.gameOver:</span><br><span class="line">    keycode = <span class="built_in">ord</span>(msvcrt.getch())</span><br><span class="line">    <span class="keyword">if</span> keycode == <span class="number">224</span>:</span><br><span class="line">      keycode = <span class="built_in">ord</span>(msvcrt.getch())</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> keycode == CTRL_UP <span class="keyword">or</span> keycode == CTRL_DOWN <span class="keyword">or</span> keycode == CTRL_LEFT <span class="keyword">or</span> keycode == CTRL_RIGHT:</span><br><span class="line">      self.move(keycode)</span><br><span class="line">      self.make_random_number()</span><br><span class="line">      self.setGameOver()</span><br><span class="line">      self.<span class="built_in">print</span>()</span><br><span class="line">    <span class="keyword">elif</span> keycode == CTRL_QUIT:</span><br><span class="line">      <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> self.gameOver:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;--------------\n很遗憾…… 游戏失败了！ 最大合并数字为： &#123;&#125;&quot;</span>.<span class="built_in">format</span>(<span class="built_in">max</span>(self.<span class="built_in">map</span>)))</span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;----------------\n合并到的最大数字是： &#123;&#125;&quot;</span>.<span class="built_in">format</span>(<span class="built_in">max</span>(self.<span class="built_in">map</span>)))</span><br></pre></td></tr></table></figure>
-<p>  最后一步一气呵成！！！</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line">impport msvcrt</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">  Game().run()</span><br></pre></td></tr></table></figure>
-<p>行了……<br>运行测试看看有没有问题， 如果没啥问题可以考虑给他加上更多有趣好玩的功能了。<br>比如加上积分系统， 2048音频版积分系统非常粗糙， 数学没学好的结果就是这样， 语音功能， 排行榜功能， 或者想办法直接写一个web版， 玩这个不需要下载安装直接在浏览器上玩儿，  </p>
-<p>或者半岛手机屏幕上等等， 发挥想象力， 尽情的创造吧！！！</p>
-<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>  我们写一些程序有很多方法， 有的笨拙， 有的精巧， 不管如何， 只要你动手肯定会感觉到收获的喜悦！<br>希望本文对你们有所帮助吧……<br>感谢你看到这里……</p>
-<p>如果你和我一样爱好写程序就加入如下qq群：<br>162093878</p>
-
+          <p>使用python编程语言实现2048游戏核心代码</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2022/08/10/2048-audio/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
