@@ -199,10 +199,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-08-15 23:37:47 / 修改时间：23:39:41" itemprop="dateCreated datePublished" datetime="2022-08-15T23:37:47+08:00">2022-08-15</time>
+              <time title="创建时间：2022-08-15 23:37:47" itemprop="dateCreated datePublished" datetime="2022-08-15T23:37:47+08:00">2022-08-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-16 01:04:34" itemprop="dateModified" datetime="2022-08-16T01:04:34+08:00">2022-08-16</time>
+              </span>
 
           
 
@@ -273,7 +279,7 @@
 <p>  这里面记录了poetry分析报告， 换句话说poetry通过pyproject.toml文件来分析给出poetry.lock这个结果文件。  </p>
 <p>  那么问题来了， 我们的pyproject.toml文件里已经列举了所有的依赖项， 那么多出一个poetry.lock文件有什么用？  </p>
 <ul>
-<li><p>提高效率，我们知道poetry分析依赖关系很慢， 官方自己也承认， 如果有这个锁定文件那么不用第二次分析依赖关系， 直接从锁定文件里拿来使用结就可以了果  </p>
+<li><p>提高效率，我们知道poetry分析依赖关系很慢， 官方自己也承认， 如果有这个锁定文件那么不用第二次分析依赖关系， 直接从锁定文件里拿来使用就可以了  </p>
 </li>
 <li><p>版本锁定 任何一个活跃的依赖项都一直在开发， 一直在发布新版本， 那么你的项目依赖某个依赖项的特定版本， 如果安装的不是这个版本， 而是最新版本， 那么我们的项目就很有可能出现问题了， 如果直接锁定某个版本不会因为依赖项的版本更迭而影响到我们的项目。    </p>
 </li>
