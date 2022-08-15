@@ -207,7 +207,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-08-16 01:04:34" itemprop="dateModified" datetime="2022-08-16T01:04:34+08:00">2022-08-16</time>
+                <time title="修改时间：2022-08-16 01:12:53" itemprop="dateModified" datetime="2022-08-16T01:12:53+08:00">2022-08-16</time>
               </span>
 
           
@@ -221,7 +221,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="poetry配置和使用"><a href="#poetry配置和使用" class="headerlink" title="poetry配置和使用"></a>poetry配置和使用</h1><p>  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。  </p>
+          <p>poetry工具的配置和使用<br>more</p>
+<h1 id="poetry配置和使用"><a href="#poetry配置和使用" class="headerlink" title="poetry配置和使用"></a>poetry配置和使用</h1><p>  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。  </p>
 <h3 id="配置缓存位置"><a href="#配置缓存位置" class="headerlink" title="配置缓存位置"></a>配置缓存位置</h3><p>  我们可以使用config命令来管理poetry配置，  比如：</p>
 <figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">poetry config --list # 列举所有配置条目</span><br><span class="line">注意每一个key的value， 我们需要额外注意如下几个key</span><br><span class="line">* cache-<span class="built_in">dir</span> # 缓存目录， 字符串 </span><br><span class="line">* virtualenvs.<span class="built_in">path</span> # 虚拟环境目录， 字符串 </span><br><span class="line">* virtualenvs.create # 是否使用虚拟环境， Boolean， 如果为真创建虚拟环境</span><br><span class="line">* virtualenvs.<span class="keyword">in</span>-project # 是否在项目目录下存放虚拟环境， Boolean， 如果为真在项目目录下的ven里创建虚拟环境</span><br><span class="line">* tool.poetry.source # 不可用， 也许以后通过这个能设置pypi源， 目前只能在pyproject.toml文件里手工写入了， 默认值null</span><br><span class="line"></span><br><span class="line">poetry config key # 单独查看key的值</span><br><span class="line">poetry config key value # 设置key的value</span><br><span class="line">poetry config unset key # key恢复默认</span><br></pre></td></tr></table></figure>
 
@@ -361,10 +362,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-08-15 23:37:30 / 修改时间：23:53:45" itemprop="dateCreated datePublished" datetime="2022-08-15T23:37:30+08:00">2022-08-15</time>
+              <time title="创建时间：2022-08-15 23:37:30" itemprop="dateCreated datePublished" datetime="2022-08-15T23:37:30+08:00">2022-08-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-16 01:12:24" itemprop="dateModified" datetime="2022-08-16T01:12:24+08:00">2022-08-16</time>
+              </span>
 
           
 
@@ -377,7 +384,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="依赖管理介绍"><a href="#依赖管理介绍" class="headerlink" title="依赖管理介绍"></a>依赖管理介绍</h2><p>  在编写程序的时候我们的软件项目需要源代码管理， 最好的源代码管理工具应该是git， 所以特别值得大家学习使用……</p>
+          <p>软件项目依赖管理和python语言的依赖管理现状介绍<br>more</p>
+<h2 id="依赖管理介绍"><a href="#依赖管理介绍" class="headerlink" title="依赖管理介绍"></a>依赖管理介绍</h2><p>  在编写程序的时候我们的软件项目需要源代码管理， 最好的源代码管理工具应该是git， 所以特别值得大家学习使用……</p>
 <p>  关于git的主题比较大， 这次我们说另外一个重要主题依赖管理！  </p>
 <h3 id="什么是依赖管理"><a href="#什么是依赖管理" class="headerlink" title="什么是依赖管理"></a>什么是依赖管理</h3><p>  在实际编写程序的过程中我们的项目需要依赖其他若干个已经存在的模块， 在这些模块的基础上进一步的开发， 就像搭积木一样， </p>
 <p>这些模块已经是其他人开发完成的， 我们直接拿来使用就可以了， 所以这些模块都被形象的称之为轮子！  </p>
@@ -481,10 +489,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-08-10 20:00:10 / 修改时间：20:06:04" itemprop="dateCreated datePublished" datetime="2022-08-10T20:00:10+08:00">2022-08-10</time>
+              <time title="创建时间：2022-08-10 20:00:10" itemprop="dateCreated datePublished" datetime="2022-08-10T20:00:10+08:00">2022-08-10</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-16 01:11:32" itemprop="dateModified" datetime="2022-08-16T01:11:32+08:00">2022-08-16</time>
+              </span>
 
           
 
@@ -497,7 +511,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>  带着大家解析一下2048是如何被实现的， 后续有时间继续讲一讲pygame， wxpython这些的使用。<br>初学者乍一看感觉特别难， 实际上只要你认真看， 动手实现一下掌握核心实现还是比较容易的， 然后调用语音库朗读一下也就实现了2048。<br>2048的实现可谓八仙过海各显神通， 所以如下只是其中一个实现方式而已， 大家可以自行探索效率更高， 实现更简单的方法……<br>注意如果文字叙述不太理解的话直接看代码， 或者跳过去看下一段然后在回过头看不理解的段落！</p>
+          <p>使用python编程语言实现2048游戏核心代码<br>more<br>  带着大家解析一下2048是如何被实现的， 后续有时间继续讲一讲pygame， wxpython这些的使用。<br>初学者乍一看感觉特别难， 实际上只要你认真看， 动手实现一下掌握核心实现还是比较容易的， 然后调用语音库朗读一下也就实现了2048。<br>2048的实现可谓八仙过海各显神通， 所以如下只是其中一个实现方式而已， 大家可以自行探索效率更高， 实现更简单的方法……<br>注意如果文字叙述不太理解的话直接看代码， 或者跳过去看下一段然后在回过头看不理解的段落！</p>
 <h3 id="起点"><a href="#起点" class="headerlink" title="起点"></a>起点</h3><p>  首先我们需要四个方向， 从game2048.py里查看代码：</p>
 <figure class="highlight python"><table><tr><td class="code"><pre><span class="line">DIRECTION_UP = <span class="number">0</span></span><br><span class="line">DIRECTION_DOWN = <span class="number">1</span></span><br><span class="line">DIRECTION_LEFT = <span class="number">2</span></span><br><span class="line">DIRECTION_RIGHT = <span class="number">3</span></span><br></pre></td></tr></table></figure>
 
