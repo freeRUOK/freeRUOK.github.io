@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="poetry配置和使用  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。   配置缓存位置  我们可以使用config命令来管理poetry配置，  比如： poetry config --list # 列举所有配置条目注意每一个key的value， 我们需要额外注意如下几个key* cache-dir # 缓存目录， 字符串 * virtualenvs.path">
+<meta property="og:type" content="article">
+<meta property="og:title" content="poetry_II——配置和使用">
+<meta property="og:url" content="https://freeruok.github.io/2022/08/15/poetry-II/index.html">
+<meta property="og:site_name" content="freeRUOK">
+<meta property="og:description" content="poetry配置和使用  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。   配置缓存位置  我们可以使用config命令来管理poetry配置，  比如： poetry config --list # 列举所有配置条目注意每一个key的value， 我们需要额外注意如下几个key* cache-dir # 缓存目录， 字符串 * virtualenvs.path">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-08-15T15:37:47.000Z">
+<meta property="article:modified_time" content="2022-08-15T15:39:41.011Z">
+<meta property="article:author" content="freeRUOK">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2022/08/15/poetry-II/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>poetry_II——配置和使用 | freeRUOK</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">freeRUOK</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+        <li class="menu-item menu-item-commonweal">
+
+    <a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/08/15/poetry-II/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="freeRUOK">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          poetry_II——配置和使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-08-15 23:37:47 / 修改时间：23:39:41" itemprop="dateCreated datePublished" datetime="2022-08-15T23:37:47+08:00">2022-08-15</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="poetry配置和使用"><a href="#poetry配置和使用" class="headerlink" title="poetry配置和使用"></a>poetry配置和使用</h1><p>  我们接下来写一个依赖四个第三方库的百度热搜程序， 最大限度的还原实际开发过程。  </p>
+<h3 id="配置缓存位置"><a href="#配置缓存位置" class="headerlink" title="配置缓存位置"></a>配置缓存位置</h3><p>  我们可以使用config命令来管理poetry配置，  比如：</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">poetry config --list # 列举所有配置条目</span><br><span class="line">注意每一个key的value， 我们需要额外注意如下几个key</span><br><span class="line">* cache-<span class="built_in">dir</span> # 缓存目录， 字符串 </span><br><span class="line">* virtualenvs.<span class="built_in">path</span> # 虚拟环境目录， 字符串 </span><br><span class="line">* virtualenvs.create # 是否使用虚拟环境， Boolean， 如果为真创建虚拟环境</span><br><span class="line">* virtualenvs.<span class="keyword">in</span>-project # 是否在项目目录下存放虚拟环境， Boolean， 如果为真在项目目录下的ven里创建虚拟环境</span><br><span class="line">* tool.poetry.source # 不可用， 也许以后通过这个能设置pypi源， 目前只能在pyproject.toml文件里手工写入了， 默认值null</span><br><span class="line"></span><br><span class="line">poetry config key # 单独查看key的值</span><br><span class="line">poetry config key value # 设置key的value</span><br><span class="line">poetry config unset key # key恢复默认</span><br></pre></td></tr></table></figure>
+
+<p>  我们的poetry从网上下载模块后在本地缓存起来了， 这样下次使用的时候不用从网上下载直接用本地缓存的副本， 好处提高速度， 坏处就是占位置。。  </p>
+<p>  此外我们的项目环境也需要空间， 那么我们可以把环境放在项目目录下， 也可以集中放在虚拟环境目录下， 解释参见上面的key列表。</p>
+<p>  运行poetry config –list命令得知我们的默认缓存目录在，  </p>
+<p>  当前用户家目录下的\AppData\Local\pypoetry\Cache</p>
+<p>  默认虚拟环境目录在poetry缓存目录下的virtualenvs文件夹下， 也就是说所有项目的虚拟环境都集中存放在这里。  </p>
+<p>  如果你的C盘空间足够大， 那么我觉得没必要改变默认的配置， 直接使用就行， 如果你C盘空间比较紧张的话， 先把缓存目录； 虚拟环境目录都修改到D盘。</p>
+<p>  我们只要改变缓存目录就可以了， 因为虚拟环境目录引用了缓存目录， 类似于环境变量一样的效果， 只要更改缓存目录虚拟环境目录也跟着改变，  当然只要你愿意可以单独配置虚拟环境目录。  </p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">poetry config cache-<span class="built_in">dir</span> D:\cache\poetry-cache # 设置缓存目录</span><br><span class="line">poetry config --list # 查看所有配置条目</span><br></pre></td></tr></table></figure>
+
+<p>  这样以来我们的所有缓存文件都在D盘的cache\poetry-cache文件夹下了， 而虚拟环境目录在该目录的virtualenvs文件夹里， 如果哪天空间不够可以完全删除这些文件， 只要在你的项目里包含pyproject.toml文件就什么都不怕， 我们随时可以重新创建所有一切。  </p>
+<h3 id="pyproject-toml文件"><a href="#pyproject-toml文件" class="headerlink" title="pyproject.toml文件"></a>pyproject.toml文件</h3><p>  这个文件好像就像提货单， 只要这个文件在手随时随地都能重建开发环境， 当然poetry需要安装而且网络必须畅通。</p>
+<h4 id="pyproject-toml文件的结构"><a href="#pyproject-toml文件的结构" class="headerlink" title="pyproject.toml文件的结构"></a>pyproject.toml文件的结构</h4><p>  这个文件的内容有如下几个部分： </p>
+<ul>
+<li><p>项目信息， 比如名称; 版本; 简短描述； 作者； 维护者 </p>
+</li>
+<li><p>依赖项 可以是pypi元； 本地其他模块； 网络上的模块</p>
+</li>
+<li><p>开发阶段依赖项 在正式版本里不包含这些依赖项 </p>
+</li>
+<li><p>其他必要信息 比如 生成项目的工具； pypi元等等 </p>
+<p>原则上你不可手工修改这个文件， 但是我们配置pypi元还是需要修改文件的， “在地球上的部分地方写程序你需要掌握相关知识点学会使用相关工具之外， 你必须需要学会忍耐网络connect_error的耐心， 学会和各种网络错误做斗争， 最好系统的学习一下网络原理， 否则一肚子气， 无处发泄！”</p>
+<p>其实这里面的内容非常多， 列举两个重要主题 </p>
+</li>
+<li><p>版本约束 所谓版本约束就是某个依赖项最低是哪个版本； 最高是哪个版本， 特定的一个版本或者多个版本， 排除某些版本等等  举个例子有些软件还在使用sql server2003， 如果你用最新的pythonsql server模块显然不兼容的， 所以我们从python sql server模块历史版本里找到能正常调用sql server2003的历史版本， 作为版本约束写在pyproject.toml文件里， 这样以后这个项目能下载安装正确的依赖项版本  </p>
+</li>
+<li><p>依赖组 比如生成软件文档的某些依赖， 我们可以单独拿出来作为一个依赖组， 默认我们知道的有主要依赖组和开发依赖组但是没有文档依赖组， 那么我们完全可以自定义一个新的依赖组</p>
+</li>
+</ul>
+<h4 id="创建pyproject-toml文件"><a href="#创建pyproject-toml文件" class="headerlink" title="创建pyproject.toml文件"></a>创建pyproject.toml文件</h4><p>  我们可以使用new或者init命令都能创建这个文件， 但是两者有一些差别。  </p>
+<ul>
+<li><p>poetry new 项目名称 # 在当前文件夹下创建一个全新的项目， 生成最基本的项目布局和pyproject.toml文件, 自行创建项目文件夹， 没有交互会话</p>
+</li>
+<li><p>poetry init # 在当前文件夹下创建pyproject.toml文件， 不会自行创建项目文件夹， 假定你的项目已经存在， 而且当前文件夹是你项目的根目录， 用户需要回答几个问题  </p>
+<p>哪种方式都一样创建pypoetry.toml文件， 如果想要接管已经存在的项目用init命令， 如果新建项目用new命令就可以了。</p>
+<p>如果init的时候遇见两个问题， 一律选择n， 默认答案是y， 如果你选择y在网上搜索包特别慢， 特别慢， 第三个问题记得选择y， 要不然前面的都白干了， 当然也完全可以一路回车也行。</p>
+</li>
+</ul>
+<p>第一个问题： Would you like to define your main dependencies interactively? (yes&#x2F;no) [yes]<br>第二个问题： Would you like to define your development dependencies interactively? (yes&#x2F;no) [yes]<br>  init请自行探索！  </p>
+<p>  这里我们用new命令 ：</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">&gt;poetry new  baidu-hot</span><br><span class="line">Created package baidu_hot <span class="keyword">in</span> baidu-hot</span><br></pre></td></tr></table></figure>
+<p>  我们可以看到这个目录下生成了pyproject.toml文件和其他一些文件夹和文件， 至于要不要用这些文件决定权在于我们， 这里我们删掉了除了pyproject.toml文件之外的所有文件。  </p>
+<h4 id="配置pypi元"><a href="#配置pypi元" class="headerlink" title="配置pypi元"></a>配置pypi元</h4><p>  这里我们说的非常热闹， 但是我们还没有创建真正的开发环境， 在此之前需要配置pypi元， 有人说poetry直接能调用全局pypi元， 可惜我这边不行。  </p>
+<p>  此外配置用户家目录\appdata\Roaming\pypoetry\config.toml文件也没有起效， 不知道哪里的问题。  </p>
+<p>  所以无奈之下只能把如下内容追加到pyproject.toml文件的末尾， </p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#设置poetry包管理工具的自定义pypi镜像源配置</span><br><span class="line">[[tool.poetry.source]]</span><br><span class="line">name = &quot;aliyun&quot;</span><br><span class="line">url = &quot;http://mirrors.aliyun.com/pypi/simple&quot;</span><br><span class="line">default = true</span><br></pre></td></tr></table></figure>
+
+<p>  接下来我们可以愉快的添加依赖项了， 用add命令： 绝大多数都是命令的输出， 我加上了适当的注释, 此外高版本的wx必须安装wxpython310。</p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="function">D:\<span class="title">Src</span>\<span class="title">python</span>\<span class="title">baidu</span>-<span class="title">hot</span>&gt;<span class="title">poetry</span> <span class="title">add</span> <span class="title">requests</span> <span class="title">lxml</span> <span class="title">bs4</span> <span class="title">wxpython310</span> # 一次可以添加多个模块， 用空格隔开</span></span><br><span class="line"><span class="function"><span class="title">Creating</span> <span class="title">virtualenv</span> <span class="title">baidu</span>-<span class="title">hot</span>-<span class="title">l</span>-<span class="title">IYpCe_</span>-<span class="title">py3</span>.10 <span class="title">in</span> <span class="title">D</span>:\<span class="title">cache</span>\<span class="title">poetry</span>-<span class="title">cache</span>\<span class="title">virtualenvs</span> # 创建虚拟环境</span></span><br><span class="line"><span class="function"># 下面是我们项目的依赖项， 给出了名称和版本</span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^2.28.1 <span class="title">for</span> <span class="title">requests</span></span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^4.9.1 <span class="title">for</span> <span class="title">lxml</span></span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^0.0.1 <span class="title">for</span> <span class="title">bs4</span></span></span><br><span class="line"><span class="function"><span class="title">Using</span> <span class="title">version</span> ^4.1.2-<span class="title">alpha</span>.2 <span class="title">for</span> <span class="title">wxpython310</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Updating</span> <span class="title">dependencies</span></span></span><br><span class="line"><span class="function"><span class="title">Resolving</span> <span class="title">dependencies</span>... # 这里慢慢等， 解析依赖的时间比较长， 官方的解释是， 因为每一个模块的数据格式都不统一， 需要大量的分析， 暂时无解， 也许未来找到解决方案</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Writing</span> <span class="title">lock</span> <span class="title">file</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">Package</span> <span class="title">operations</span>: 23 <span class="title">installs</span>, 0 <span class="title">updates</span>, 0 <span class="title">removals</span> # 你看就这么个小项目一共需要安装23个依赖项</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"># 需要安装的所有依赖项</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pyparsing</span> (3.0.9)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">soupsieve</span> (2.3.2.<span class="title">post1</span>)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">atomicwrites</span> (1.4.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">attrs</span> (22.1.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">certifi</span> (2022.6.15)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">charset</span>-<span class="title">normalizer</span> (2.1.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">colorama</span> (0.4.5)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">beautifulsoup4</span> (4.11.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">idna</span> (3.3)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">numpy</span> (1.23.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pillow</span> (9.2.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pluggy</span> (0.13.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">more</span>-<span class="title">itertools</span> (8.14.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">packaging</span> (21.3)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">py</span> (1.11.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">six</span> (1.16.0)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">urllib3</span> (1.26.11)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">wcwidth</span> (0.2.5)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">bs4</span> (0.0.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">lxml</span> (4.9.1)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">wxpython310</span> (4.1.2<span class="title">a2</span>)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">pytest</span> (5.4.3)</span></span><br><span class="line"><span class="function">  • <span class="title">Installing</span> <span class="title">requests</span> (2.28.1)</span></span><br></pre></td></tr></table></figure>
+
+<p>  终于把需要的环境都安装妥当了， 接下来开始真正的着手开发我们的软件。  </p>
+<p>  不过在此之前， 还需要看看我们的项目目录， 发现新生成了一个文件叫poetry.lock, 这是一把锁， 可以用文本编辑器打开瞧一瞧， 里面都是什么玩意.  </p>
+<p>  这里面记录了poetry分析报告， 换句话说poetry通过pyproject.toml文件来分析给出poetry.lock这个结果文件。  </p>
+<p>  那么问题来了， 我们的pyproject.toml文件里已经列举了所有的依赖项， 那么多出一个poetry.lock文件有什么用？  </p>
+<ul>
+<li><p>提高效率，我们知道poetry分析依赖关系很慢， 官方自己也承认， 如果有这个锁定文件那么不用第二次分析依赖关系， 直接从锁定文件里拿来使用结就可以了果  </p>
+</li>
+<li><p>版本锁定 任何一个活跃的依赖项都一直在开发， 一直在发布新版本， 那么你的项目依赖某个依赖项的特定版本， 如果安装的不是这个版本， 而是最新版本， 那么我们的项目就很有可能出现问题了， 如果直接锁定某个版本不会因为依赖项的版本更迭而影响到我们的项目。    </p>
+</li>
+<li><p>保证团队开发环境相同， 有这个锁定文件能确保项目组的所有人员都在相同的开发环境上工作， 团队的虚拟python环境一样， 团队的依赖项也相同  </p>
+<p>所以结论， pyproject.toml决定大政方针， 而poetry.lock文件规定实施细则。  </p>
+<p>有没有觉得心里爽， 我们用pyproject.toml文件决定最基本的方向， 我需要哪些模块， 这些模块是哪个版本的， 然后poetry根据你的要求分析生成了具体的计划书， 这个模块用这个版本， 而且这个模块也依赖其他这些模块。 锁定文件里也记录了依赖项文件的哈希值。</p>
+</li>
+</ul>
+<h3 id="实际体验"><a href="#实际体验" class="headerlink" title="实际体验"></a>实际体验</h3><p>  代码不多， 直接在项目目录下创建一个app.py文件， 内容如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># --*-- Encoding: UTF-8 --*--</span></span><br><span class="line"><span class="comment">#! filename: baidu_hot/app.py</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 在列表框上显示百度热搜</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"><span class="keyword">import</span> wx</span><br><span class="line"><span class="keyword">import</span> bs4</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">downloadBaiduHot</span>():</span><br><span class="line">  <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">    returns 热搜标题列表</span></span><br><span class="line"><span class="string">  &#x27;&#x27;&#x27;</span></span><br><span class="line">  results = <span class="literal">None</span></span><br><span class="line">  url = <span class="string">&quot;http://www.baidu.com/&quot;</span></span><br><span class="line">  headers = &#123;<span class="string">&quot;user-agent&quot;</span>: <span class="string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.134 Safari/537.36 Edg/103.0.1264.71&quot;</span>&#125;</span><br><span class="line">  response = requests.get(url, headers=headers)</span><br><span class="line">  <span class="keyword">if</span> response.ok:</span><br><span class="line">    soup = bs4.BeautifulSoup(response.text, <span class="string">&quot;lxml&quot;</span>)</span><br><span class="line">    results = []</span><br><span class="line">  <span class="comment"># 留意select函数的返回类型</span></span><br><span class="line">    <span class="keyword">for</span> element <span class="keyword">in</span> soup.select(<span class="string">&quot;.s-hotsearch-content&quot;</span>)[<span class="number">0</span>]:</span><br><span class="line">      results.append(element.text)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> results</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">  app = wx.App()</span><br><span class="line">  results = downloadBaiduHot()</span><br><span class="line">  <span class="keyword">if</span> results <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">    wx.MessageBox(<span class="string">&quot;加载失败&quot;</span>)</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 先创建一个窗口或者叫框架， 然后在这个框架里放置一个面板， 在把列表框放到这个面板上， 否则的话tab键没有焦点</span></span><br><span class="line">  frame = wx.Frame(<span class="literal">None</span>, title=<span class="string">&quot;百度热搜&quot;</span>)</span><br><span class="line">  panel = wx.Panel(frame)</span><br><span class="line">  listBox = wx.ListBox(panel)</span><br><span class="line">  listBox.<span class="type">Set</span>(results)</span><br><span class="line">  frame.Show()</span><br><span class="line">  app.MainLoop()</span><br></pre></td></tr></table></figure>
+
+<h4 id="运行项目"><a href="#运行项目" class="headerlink" title="运行项目"></a>运行项目</h4><p>  这个时候我们首先需要进入项目虚拟环境下， 如果在你的全局环境下已经有lxml; requests; bs4和wxpython那么先卸载掉这些模块， 以便于我们测试虚拟环境。  </p>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line">python app.py</span><br><span class="line">报错, importError</span><br><span class="line">poetry shell</span><br><span class="line">python app.py</span><br><span class="line"># 成功运行</span><br></pre></td></tr></table></figure>
+
+<p>  所以实际运行项目之前不要忘了先进入到虚拟环境下， 退出虚拟环境用exit就可以了。  </p>
+<p>  到目前为止我们的项目下有三个文件， 我们简单梳理一下：</p>
+<ul>
+<li><p>app.py 项目代码  </p>
+</li>
+<li><p>pyproject.toml poetry依赖管理描述文件</p>
+</li>
+<li><p>poetry.lock poetry锁定文件， 能有效的提高解析速度  </p>
+<p>此外我们的项目依赖项缓存在d:\cache\poetry-cache\目录下， 我们的虚拟环境包括依赖项都在d:\cache\poetry-cache\Virtualenvs\项目名称-python版本\下。  </p>
+<p>如果你因为各种原因重建项目环境， 比如清理磁盘删掉了依赖项缓存或者整个环境， 买了新电脑了， 那么可以使用，</p>
+</li>
+</ul>
+<figure class="highlight bat"><table><tr><td class="code"><pre><span class="line"><span class="built_in">cd</span> 项目目录 # 这里必须存在pyproject.toml文件</span><br><span class="line">poetry install</span><br></pre></td></tr></table></figure>
+
+<p>  这样的话可以重新安装你的项目环境了。  </p>
+<p>当然据说可以单独配置某个项目， 方法就是在当前项目根目录下放一个config.toml文件。 </p>
+<p>  其他更多用法请自行探索， 此外文末留下一些参考主题， 大家可以进一步探索， 本篇只是带你感性的认识一下依赖管理这样一个主题， 要想真正的使用还是需要系统的学习的。</p>
+<ul>
+<li><p>(语义化版本 2.0.0)[<a target="_blank" rel="noopener" href="https://semver.org/lang/zh-CN/]">https://semver.org/lang/zh-CN/]</a></p>
+</li>
+<li><p>(poetry)[<a target="_blank" rel="noopener" href="https://github.com/python-poetry/poetry]">https://github.com/python-poetry/poetry]</a></p>
+</li>
+<li><p>(pipx)[<a target="_blank" rel="noopener" href="https://github.com/pypa/pipx]">https://github.com/pypa/pipx]</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/08/15/poetry-I/" rel="prev" title="poetry_I——介绍">
+      <i class="fa fa-chevron-left"></i> poetry_I——介绍
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#poetry%E9%85%8D%E7%BD%AE%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="nav-number">1.</span> <span class="nav-text">poetry配置和使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%BC%93%E5%AD%98%E4%BD%8D%E7%BD%AE"><span class="nav-number">1.0.1.</span> <span class="nav-text">配置缓存位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pyproject-toml%E6%96%87%E4%BB%B6"><span class="nav-number">1.0.2.</span> <span class="nav-text">pyproject.toml文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pyproject-toml%E6%96%87%E4%BB%B6%E7%9A%84%E7%BB%93%E6%9E%84"><span class="nav-number">1.0.2.1.</span> <span class="nav-text">pyproject.toml文件的结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BApyproject-toml%E6%96%87%E4%BB%B6"><span class="nav-number">1.0.2.2.</span> <span class="nav-text">创建pyproject.toml文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEpypi%E5%85%83"><span class="nav-number">1.0.2.3.</span> <span class="nav-text">配置pypi元</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E4%BD%93%E9%AA%8C"><span class="nav-number">1.0.3.</span> <span class="nav-text">实际体验</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.0.3.1.</span> <span class="nav-text">运行项目</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
