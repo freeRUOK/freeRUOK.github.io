@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="初步认识自定义事件， 获取小说所有章节标题和URL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="小说章节合并插件-第四篇">
+<meta property="og:url" content="https://freeruok.github.io/2022/09/03/NovelMerge-IV/index.html">
+<meta property="og:site_name" content="freeRUOK">
+<meta property="og:description" content="初步认识自定义事件， 获取小说所有章节标题和URL">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-09-03T02:33:28.000Z">
+<meta property="article:modified_time" content="2022-09-03T02:34:06.591Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="原创">
+<meta property="article:tag" content="项目">
+<meta property="article:tag" content="实战">
+<meta property="article:tag" content="异步">
+<meta property="article:tag" content="事件">
+<meta property="article:tag" content="观察者模式">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2022/09/03/NovelMerge-IV/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>小说章节合并插件-第四篇 | freeRUOK</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">freeRUOK</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/09/03/NovelMerge-IV/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="freeRUOK">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          小说章节合并插件-第四篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-09-03 10:33:28 / 修改时间：10:34:06" itemprop="dateCreated datePublished" datetime="2022-09-03T10:33:28+08:00">2022-09-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/JavaScript/" itemprop="url" rel="index"><span itemprop="name">JavaScript</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">初步认识自定义事件， 获取小说所有章节标题和URL</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="合并小说插件第四篇"><a href="#合并小说插件第四篇" class="headerlink" title="合并小说插件第四篇"></a>合并小说插件第四篇</h2><p>  这次我们从后台走向前台了！ 开始在网页里插入我们的页面元素， 刚开始我们加入一个按钮和一个表格， 感觉有点大张旗鼓， 哈哈哈。  。</p>
+<p>  本来我想着把所有的工作都用promise来实现， 但是这条路走入死胡同， 非常顺利的失败了。  </p>
+<p>  我们知道获取第一页的内容后才能获取第二页的地址， 而且有多少页这是不确定的， 如果你强行使用promise实现难度太大， 我尝试了一下后来放弃了， 因为我们有更好的选择， 没必要在一棵树上吊死！  </p>
+<p>  所以说在编写程序的时候遇到一些不能处理的问题可以改变一下思维， 看看有没有更简单的方法， 如果有的话果断改变， 如果没有继续思考其他办法， 不管编程还是和人交往不能过于死心眼， 这个好听叫执着， 难听就是杠精。  </p>
+<p>  那么这个新的办法就是事件， 只要你用过html和js肯定遇到过事件， 比如按钮被单机或者文本框里输入内容后都会发生对应的事件， 我们可以编写事件处理函数来处理这些事件， </p>
+<p>  比如某个按钮被单机后发送一个网络请求， 又比如文本框里输入内容后检查这些内容是不是合法的等等等等， 只要遇到GUI程序的话， 事件肯定是最为常见的设计模式。  </p>
+<p>  那么我们的后台脚本如何触发事件， 这些事件又是怎么处理？  </p>
+<p>  这就是我们这一篇要重点关注的内容了！</p>
+<p>  我们知道已经有了很多标准的事件， 比如onclick; onload; onchange; onkeydown; keyup等等， 那么我们怎么生成自己的事件呢？</p>
+<p>  首先要有一个事件类型。  </p>
+<h3 id="自定义事件的要点"><a href="#自定义事件的要点" class="headerlink" title="自定义事件的要点"></a>自定义事件的要点</h3><p>  我们知道Error类型表示一个错误， 那么Event类型表示一个事件， CustomEvent表示一个携带数据的事件。  </p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 最简单的事件</span></span><br><span class="line"><span class="keyword">let</span> event = <span class="keyword">new</span> <span class="title class_">Event</span>(<span class="string">&quot;name&quot;</span>);</span><br><span class="line"><span class="comment">// 携带数据的事件</span></span><br><span class="line"><span class="keyword">let</span> customEvent = <span class="keyword">new</span> <span class="title class_">CustomEvent</span>(<span class="string">&quot;name&quot;</span>, &#123;<span class="attr">detail</span>: 任何数据&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>  那么如何触发事件， 如何处理事件呢？  </p>
+<p>  在我们的DOM对象上有三个重要方法，  </p>
+<ul>
+<li><p>addEventListener(name, handler); 在当前对象添加一个事件  </p>
+</li>
+<li><p>removeEventListener(name)  从当前对象移除一个事件  </p>
+</li>
+<li><p>dispatchEvent(new Event(name))  在当前对象下触发一个事件, 如果携带数据的话用CustomEvent类型</p>
+<p>一个显而易见的要点是， 必须调用addEventListener添加一个事件后才能用dispatchEvent来触发该事件， 如果事件不能触发的话看看两者的调用顺序。  </p>
+<p>大家可以想一想一个DOM对象有各种属性方法和事件， 那么这些DOM对象是如何生成的。  </p>
+<p>这个话题超出我们的主题了， 不过大家有空可以探索一下。</p>
+</li>
+</ul>
+<h3 id="在项目里引入事件"><a href="#在项目里引入事件" class="headerlink" title="在项目里引入事件"></a>在项目里引入事件</h3><p>  首先我们修改novel函数的名称为Novel， 同时在main函数里同时修改它的调用方式， 原来是普通函数调用现在改为创建对象。  </p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">new</span> <span class="title class_">Novel</span>();</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>  然后重新实现Novel函数， 不对现在应该称之为Novel对象。  </p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Novel</span>(<span class="params"></span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">chapters</span> = <span class="keyword">new</span> <span class="title class_">Array</span>();  <span class="comment">// 存放每个章节的标题和url</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">main</span> = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&quot;div&quot;</span>);  <span class="comment">// 作为我们插件的主要节点插入到当前页面的DOM里， 而且所有的事件都绑定在了这个元素上</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">table</span> = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&quot;table&quot;</span>);  <span class="comment">// 展示小说章节标题和URL</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">// 初始化代码块， 放到末尾调用</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">init</span> = <span class="function">() =&gt;</span> </span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">let</span> downloadButton = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&quot;button&quot;</span>);</span><br><span class="line">    downloadButton.<span class="property">innerHTML</span> = <span class="string">&quot;下载全本&quot;</span>;</span><br><span class="line">    downloadButton.<span class="title function_">addEventListener</span>(<span class="string">&quot;click&quot;</span>, <span class="function">() =&gt;</span> <span class="title function_">alert</span>(<span class="variable language_">this</span>.<span class="property">chapters</span>.<span class="property">length</span>));  <span class="comment">// 对下载按钮添加一个事件处理函数这里没有on前缀</span></span><br><span class="line">    <span class="comment">// 把按钮和表格加入到主节点， 然后把主节点加入到当前页面的body节点上</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">main</span>.<span class="title function_">appendChild</span>(downloadButton);</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">main</span>.<span class="title function_">appendChild</span>(<span class="variable language_">this</span>.<span class="property">table</span>);</span><br><span class="line">    <span class="variable language_">document</span>.<span class="property">body</span>.<span class="title function_">appendChild</span>(<span class="variable language_">this</span>.<span class="property">main</span>);</span><br><span class="line">    downloadButton.<span class="title function_">focus</span>();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 触发novelChapterPage事件， 而且传递小说章节列表的第一页的URL</span></span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">main</span>.<span class="title function_">dispatchEvent</span>(<span class="keyword">new</span> <span class="title class_">CustomEvent</span>(<span class="string">&quot;novelChapterPage&quot;</span>, &#123;<span class="attr">detail</span>: <span class="title function_">getTextURL</span>(<span class="variable language_">document</span>, <span class="string">&quot;ablum_read&quot;</span>, <span class="string">&quot;正序&quot;</span>)&#125;));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 处理novelChapterPage事件</span></span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">main</span>.<span class="title function_">addEventListener</span>(<span class="string">&quot;novelChapterPage&quot;</span>, <span class="function">(<span class="params">e</span>) =&gt;</span> </span><br><span class="line">  &#123;</span><br><span class="line">    <span class="title function_">download</span>(e.<span class="property">detail</span>)</span><br><span class="line">      .<span class="title function_">then</span>(<span class="function">(<span class="params">htmlDoc</span>) =&gt;</span> </span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">let</span> dom = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&quot;div&quot;</span>);</span><br><span class="line">        dom.<span class="property">innerHTML</span> = htmlDoc;</span><br><span class="line">        <span class="comment">// 迭代所有的章节</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> el <span class="keyword">of</span> dom.<span class="title function_">getElementsByClassName</span>(<span class="string">&quot;chapter&quot;</span>)[<span class="number">0</span>].<span class="title function_">getElementsByTagName</span>(<span class="string">&quot;a&quot;</span>))</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">let</span> title = el.<span class="property">innerText</span>;</span><br><span class="line">          <span class="keyword">let</span> url = el.<span class="title function_">getAttribute</span>(<span class="string">&quot;href&quot;</span>);</span><br><span class="line">          <span class="comment">// 把章节标题和URL加入到表格里</span></span><br><span class="line">          <span class="keyword">let</span> row = <span class="variable language_">this</span>.<span class="property">table</span>.<span class="title function_">insertRow</span>();</span><br><span class="line">          row.<span class="title function_">insertCell</span>().<span class="property">innerText</span> = title;</span><br><span class="line">          row.<span class="title function_">insertCell</span>().<span class="property">innerText</span> = url;</span><br><span class="line"></span><br><span class="line">          <span class="variable language_">this</span>.<span class="property">chapters</span>.<span class="title function_">push</span>(&#123;title, url&#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">let</span> url = <span class="title function_">getTextURL</span>(dom, <span class="string">&quot;page&quot;</span>, <span class="string">&quot;下一页&quot;</span>);</span><br><span class="line">        <span class="comment">// 如果有下一页继续触发novelChapterPage事件， 相当于自己调用自己</span></span><br><span class="line">        <span class="keyword">if</span> (url)</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="variable language_">this</span>.<span class="property">main</span>.<span class="title function_">dispatchEvent</span>(<span class="keyword">new</span> <span class="title class_">CustomEvent</span>(<span class="string">&quot;novelChapterPage&quot;</span>, &#123;<span class="attr">detail</span>: url&#125;));</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;)</span><br><span class="line">      .<span class="title function_">catch</span>(alert);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">this</span>.<span class="title function_">init</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  运行后， 快速的点击下载按钮， 看看什么场景， 然后在看看生成的表格的内容， 发现一个非常严重的问题， 章节缺失， 至少缺失了10%的章节， </p>
+<p>  如果你比较细心观察html应该早就发现了问题所在， 实际上少部分章节没有提供URL， 只是展示了章节名称而已， </p>
+<p>  这个问题怎么解决， 我们发现每个章节的序号没有规律可言， 所以首先获取章节实际内容的时候需要额外的保存下一张的URL， 然后检测到章节缺失后在调用获取内容的函数， 这个先放一放。</p>
+<p>  获取章节内容是我们下一次主要解决的问题了， 到时候在一起解决章节缺失的问题。。  </p>
+<p>  最后总结一下事件， 其实事件很简单， 需要注意的是。</p>
+<p> 触发事件和处理事件的先后顺序需要格外的留意  </p>
+<p> 不要硬编码名称， 比如我们上面的例子很有问题正确做法是</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="variable constant_">EVT_NOVEL_CHAPTER_PAGE</span> = <span class="string">&quot;novelChapterPage&quot;</span>;</span><br><span class="line">...</span><br><span class="line">obj.<span class="title function_">addEventListener</span>(<span class="variable constant_">EVT_NOVEL_CHAPTER_PAGE</span>, handler);</span><br><span class="line">obj.<span class="title function_">dispatchEvent</span>(<span class="keyword">new</span> <span class="title class_">Event</span>(<span class="variable constant_">EVT_NOVEL_CHAPTER_PAGE</span>));</span><br></pre></td></tr></table></figure>
+
+<p>  其实上面的原则适用于任何程序的任何标识符， 可以考虑如下代码。</p>
+<figure class="highlight javascript"><table><tr><td class="code"><pre><span class="line"><span class="title function_">dispatchEvent</span>(<span class="keyword">new</span> <span class="title class_">Event</span>(<span class="string">&quot;novelchapterpage&quot;</span>)); <span class="comment">// 运行出错， 用了大量的时间和经历找到大小写的问题， </span></span><br><span class="line"><span class="title function_">dispatchEvent</span>(<span class="keyword">new</span> <span class="title class_">Event</span>(<span class="variable constant_">EVT_NOVEL_CHAPTERPAGE</span>)); <span class="comment">// 运行的时候直接报错， EVT_NOVEL_CHAPTERPAGE not fount， 马上看到少了一个下划线不到一分钟就搞定问题</span></span><br></pre></td></tr></table></figure>
+
+<p>  如果这是一个小小脚本怎么写都问题不大， 如果这是一个大型项目呢？ 几十行几百行问题都不大， 几千行几万行以后问题就大了。  </p>
+<p>  所以某个字面量如果被用到多次的可能， 那么果断定义一个常量。  </p>
+<p>  本篇到此为止， 下一次我们讲一讲如何获取小说章节实际内容。</p>
+<p>  未完待续。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8E%9F%E5%88%9B/" rel="tag"># 原创</a>
+              <a href="/tags/%E9%A1%B9%E7%9B%AE/" rel="tag"># 项目</a>
+              <a href="/tags/%E5%AE%9E%E6%88%98/" rel="tag"># 实战</a>
+              <a href="/tags/%E5%BC%82%E6%AD%A5/" rel="tag"># 异步</a>
+              <a href="/tags/%E4%BA%8B%E4%BB%B6/" rel="tag"># 事件</a>
+              <a href="/tags/%E8%A7%82%E5%AF%9F%E8%80%85%E6%A8%A1%E5%BC%8F/" rel="tag"># 观察者模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/09/01/NovelMerge-III/" rel="prev" title="小说章节合并插件-第三篇">
+      <i class="fa fa-chevron-left"></i> 小说章节合并插件-第三篇
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%88%E5%B9%B6%E5%B0%8F%E8%AF%B4%E6%8F%92%E4%BB%B6%E7%AC%AC%E5%9B%9B%E7%AF%87"><span class="nav-number">1.</span> <span class="nav-text">合并小说插件第四篇</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E4%BA%8B%E4%BB%B6%E7%9A%84%E8%A6%81%E7%82%B9"><span class="nav-number">1.1.</span> <span class="nav-text">自定义事件的要点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E9%A1%B9%E7%9B%AE%E9%87%8C%E5%BC%95%E5%85%A5%E4%BA%8B%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">在项目里引入事件</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
