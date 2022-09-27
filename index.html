@@ -194,10 +194,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-09-26 18:59:14 / 修改时间：19:03:50" itemprop="dateCreated datePublished" datetime="2022-09-26T18:59:14+08:00">2022-09-26</time>
+              <time title="创建时间：2022-09-26 18:59:14" itemprop="dateCreated datePublished" datetime="2022-09-26T18:59:14+08:00">2022-09-26</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-09-27 12:31:47" itemprop="dateModified" datetime="2022-09-27T12:31:47+08:00">2022-09-27</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -219,64 +225,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="程序和内存-01-初步认识内存"><a href="#程序和内存-01-初步认识内存" class="headerlink" title="程序和内存 01.初步认识内存"></a>程序和内存 01.初步认识内存</h2><p>  接下来我们一起来探索一下在写程序的时候如何使用内存空间的！  </p>
-<p>  要求掌握某种编程语言的基础， 有C语言基础更好。</p>
-<h3 id="程序世界里的内存"><a href="#程序世界里的内存" class="headerlink" title="程序世界里的内存"></a>程序世界里的内存</h3><p>  我们的操作系统的内存管理单元把物理的内存这样一个能看得见摸得着的硬件抽象出来形成了一个几乎能让应用程序无线使用的存储空间了。  </p>
-<p>  我们讨论的主题是操作系统帮助我们抽象出来的上层应用程序能够自由使用的内存空间， 而不是物理内存， 如果你对操作系统的内存管理单元感兴趣可以参考操作系统原理。  </p>
-<p>  一般情况下每一个应用程序有自己独立的内存空间， 两个相邻的应用程序互不干扰， 都是独立存在的。  </p>
-<p>  那么这里有人可能会问， 有些程序能读写其他程序的内存， 那么为什么会这样？ 比如我们的屏幕阅读程序， 还有其他一些非法程序。  </p>
-<p>  简单回答， 因为这是二班情况， 不在我们今天讨论的范围内。  </p>
-<p>  正经答案， 因为操作系统虽然隔离了每个应用程序的内存空间， 但是为了调试； 为了增强系统的功能还是提供了一系列的接口， 通过这些功能某个应用程序可以读写其他任何一个应用程序的内存空间。  </p>
-<p>  一个程序的内存空间至少有如下几个组成部分， 就像你们家房子一样， 有客厅卧室厨房和卫生间一样， 为了方便程序内存空间也划分了不同的区域。  </p>
-<ul>
-<li><p>站区 存放函数的局部变量  轻量级数据为主</p>
-</li>
-<li><p>堆区 存放动态数据， 重量级数据为主  </p>
-</li>
-<li><p>静态常量区 存放字面量； 全局变量； 静态变量； 只读变量 </p>
-<p>暂时不考虑内存空间的其他区域， 我们这次主题主要要探索站区； 堆区和静态区。  </p>
-<p>重中之重是堆区！</p>
-</li>
-</ul>
-<h3 id="堆区和静态区的区别"><a href="#堆区和静态区的区别" class="headerlink" title="堆区和静态区的区别"></a>堆区和静态区的区别</h3><p>  通常认为字符串是重量级数据， 所以放在内存的堆区， 但是字符串字面量却放在了静态区域。  </p>
-<p>  堆区里的字符串可以随意修改， 而静态区的字符串却受保护， 只能读取， 不可修改。  </p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *str1 = <span class="string">&quot;hello&quot;</span>; <span class="comment">// 静态区</span></span><br><span class="line"><span class="type">char</span> str2[] = <span class="string">&quot;hello&quot;</span>; <span class="comment">// 堆区</span></span><br></pre></td></tr></table></figure>
-
-<p>  接下来编写一个函数来验证我们的猜测, 建议使用Linux最好的发行版Windows10。  </p>
-<p>  为了避免文章过于冗长省略了完整程序。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 原地修改字符串为大写, 需要ctype.h和string.h两个头文件</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">toUpperCase</span><span class="params">(<span class="type">char</span> *s)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">size_t</span> len = <span class="built_in">strlen</span>(s);</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">islower</span>(s[i]))</span><br><span class="line">    &#123;</span><br><span class="line">      s[i] -= <span class="number">32</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>  然后可以在main函数里测试了</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *s = <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line">toUpperCase(s);</span><br><span class="line">println(<span class="string">&quot;%s\n&quot;</span>, s);</span><br></pre></td></tr></table></figure>
-
-<p>  打开bash编译没有出现错误和警告， 运行的时候出现了问题。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ cc upper.c</span><br><span class="line">$ ./a.out</span><br><span class="line">Segmentation fault (core dumped)</span><br></pre></td></tr></table></figure>
-
-<p>  那么这个Segmentation fault (core dumped)是个什么玩意儿？  </p>
-<p>  程序段故障， 很显然我们修改了不该修改的内存。  </p>
-<p>  改为</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> s[] = <span class="string">&quot;hello world&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>  后编译运行没有任何异常。  </p>
-<p>  所以最后的结论字符串数组在堆区， 可以任意修改， 而字符串常量在静态区不可随意修改。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *s = <span class="string">&quot;hello&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>  这里的*s指针指向了静态区的某个空间， </p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
-<li><p>应用程序的内存空间分为了若干部分， 这样可以方便的管理内存空间</p>
-</li>
-<li><p>这些内存区域至少包括站区； 堆区和静态区  </p>
-</li>
-<li><p>每个区域的使用场景各不相同， 存储的数据量也不相同  </p>
-</li>
-<li><p>静态区的内存空间受保护不可修改， 而堆区的内存则可以自由的随意修改 </p>
-</li>
-<li><p>字符串数组保存在堆区， 而指向字符串的字符指针不一定指向了哪里， 也许是静态区， 也许是堆区， 或者指向了某个站区上的局部变量， 当然这个局部变量里保存了一个字符  </p>
-<p>下一次我们看看站区和堆区的区别。  </p>
-<p>未完待续……</p>
-</li>
-</ul>
-
+          <p>简要介绍了程序的内存空间分布和堆区和静态常量区的显著区别</p>
+          <!--noindex-->
+          <!--/noindex-->
+        
       
     </div>
 
