@@ -20,26 +20,25 @@
     var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="简要介绍了程序的内存空间分布和堆区和静态常量区的显著区别">
+  <meta name="description" content="关于站区的总结">
 <meta property="og:type" content="article">
-<meta property="og:title" content="程序和内存 01.初步认识内存">
-<meta property="og:url" content="https://freeruok.github.io/2022/09/26/Program_and_memory-01/index.html">
+<meta property="og:title" content="程序和内存 01.站续">
+<meta property="og:url" content="https://freeruok.github.io/2022/10/01/Program_And_Memary-03/index.html">
 <meta property="og:site_name" content="Free R U Ok">
-<meta property="og:description" content="简要介绍了程序的内存空间分布和堆区和静态常量区的显著区别">
+<meta property="og:description" content="关于站区的总结">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-09-26T10:59:14.000Z">
-<meta property="article:modified_time" content="2022-09-27T04:31:47.464Z">
+<meta property="article:published_time" content="2022-10-01T11:20:00.000Z">
+<meta property="article:modified_time" content="2022-10-01T11:17:27.762Z">
 <meta property="article:author" content="freeRUOK">
 <meta property="article:tag" content="原创">
 <meta property="article:tag" content="C语言">
 <meta property="article:tag" content="指针">
 <meta property="article:tag" content="数组">
-<meta property="article:tag" content="字符串">
 <meta property="article:tag" content="内存">
-<meta property="article:tag" content="堆区">
+<meta property="article:tag" content="战区">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://freeruok.github.io/2022/09/26/Program_and_memory-01/">
+<link rel="canonical" href="https://freeruok.github.io/2022/10/01/Program_And_Memary-03/">
 
 
 <script id="page-configurations">
@@ -52,7 +51,7 @@
   };
 </script>
 
-  <title>程序和内存 01.初步认识内存 | Free R U Ok</title>
+  <title>程序和内存 01.站续 | Free R U Ok</title>
   
 
 
@@ -183,7 +182,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/09/26/Program_and_memory-01/">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/10/01/Program_And_Memary-03/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -196,7 +195,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          程序和内存 01.初步认识内存
+          程序和内存 01.站续
         </h1>
 
         <div class="post-meta">
@@ -205,16 +204,10 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2022-09-26 18:59:14" itemprop="dateCreated datePublished" datetime="2022-09-26T18:59:14+08:00">2022-09-26</time>
+              <time title="创建时间：2022-10-01 19:20:00 / 修改时间：19:17:27" itemprop="dateCreated datePublished" datetime="2022-10-01T19:20:00+08:00">2022-10-01</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-09-27 12:31:47" itemprop="dateModified" datetime="2022-09-27T12:31:47+08:00">2022-09-27</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -226,7 +219,7 @@
             </span>
 
           
-            <div class="post-description">简要介绍了程序的内存空间分布和堆区和静态常量区的显著区别</div>
+            <div class="post-description">关于站区的总结</div>
 
         </div>
       </header>
@@ -237,61 +230,63 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h2 id="程序和内存-01-初步认识内存"><a href="#程序和内存-01-初步认识内存" class="headerlink" title="程序和内存 01.初步认识内存"></a>程序和内存 01.初步认识内存</h2><p>  接下来我们一起来探索一下在写程序的时候如何使用内存空间的！  </p>
-<p>  要求掌握某种编程语言的基础， 有C语言基础更好。</p>
-<h3 id="程序世界里的内存"><a href="#程序世界里的内存" class="headerlink" title="程序世界里的内存"></a>程序世界里的内存</h3><p>  我们的操作系统的内存管理单元把物理的内存这样一个能看得见摸得着的硬件抽象出来形成了一个几乎能让应用程序无线使用的存储空间了。  </p>
-<p>  我们讨论的主题是操作系统帮助我们抽象出来的上层应用程序能够自由使用的内存空间， 而不是物理内存， 如果你对操作系统的内存管理单元感兴趣可以参考操作系统原理。  </p>
-<p>  一般情况下每一个应用程序有自己独立的内存空间， 两个相邻的应用程序互不干扰， 都是独立存在的。  </p>
-<p>  那么这里有人可能会问， 有些程序能读写其他程序的内存， 那么为什么会这样？ 比如我们的屏幕阅读程序， 还有其他一些非法程序。  </p>
-<p>  简单回答， 因为这是二班情况， 不在我们今天讨论的范围内。  </p>
-<p>  正经答案， 因为操作系统虽然隔离了每个应用程序的内存空间， 但是为了调试； 为了增强系统的功能还是提供了一系列的接口， 通过这些功能某个应用程序可以读写其他任何一个应用程序的内存空间。  </p>
-<p>  一个程序的内存空间至少有如下几个组成部分， 就像你们家房子一样， 有客厅卧室厨房和卫生间一样， 为了方便程序内存空间也划分了不同的区域。  </p>
+        <h2 id="程序和内存-3-站续"><a href="#程序和内存-3-站续" class="headerlink" title="程序和内存 3.站续"></a>程序和内存 3.站续</h2><p>  在C语言里有一些和数组相关的一些很让人迷惑的特点， 今天我们一起探索为什么会出现这样的情况， 之后给站区做一个总结。  </p>
+<h3 id="伪装成数组的指针"><a href="#伪装成数组的指针" class="headerlink" title="伪装成数组的指针"></a>伪装成数组的指针</h3><p>  我们有这样一个函数：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">fun</span><span class="params">(<span class="type">int</span> a1[])</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> a2[<span class="number">100</span>];</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%d, %d&quot;</span>, <span class="keyword">sizeof</span>(a1), <span class="keyword">sizeof</span>(a2));</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// main</span></span><br><span class="line">  <span class="type">int</span> ary[<span class="number">200</span>];</span><br><span class="line">  fun(ary);</span><br></pre></td></tr></table></figure>
+
+<p>  编译运行这个程序， 我们希望得到的结果是800和400， 但是结果却是8和400， 在三十二位系统上是4和400。  </p>
+<p>  那么为什么会这样， 原因就是把数组作为参数传入其他函数的时候实际上传递的是该数组的内存地址。  </p>
+<p>  所以把函数的数组参数用sizeof运算得到了指针的大小， 如果把数组定义在函数内部的话, 那么sizeof的结果就是数组的大小。  </p>
+<p>  所以说在C语言里数组传参需要一个额外的参数来记录数组的长度， 如果数组的类型是字符串的话就不需要额外的参数了， 因为通常情况下字符串的结尾是’\0’，  </p>
+<p>  只要检测这个’\0’就知道长度了， 但是其他类型的数组就没办法知道传过来的数组有多长。</p>
+<h3 id="在C语言里为什么必须在编译阶段确定其大小"><a href="#在C语言里为什么必须在编译阶段确定其大小" class="headerlink" title="在C语言里为什么必须在编译阶段确定其大小"></a>在C语言里为什么必须在编译阶段确定其大小</h3><p>  此外C语言的数组和其他语言有个显著的差距， 先看一段java数组初始化代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="type">int</span> <span class="variable">LEN</span> <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line"><span class="type">int</span>[] ary = <span class="keyword">new</span> <span class="title class_">int</span>[LEN];</span><br></pre></td></tr></table></figure>
+
+<p>  同样的代码在C语言里行不通， 先学习其他语言之后在学习C语言的人肯定踩过这个坑。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">const</span> <span class="type">int</span> LEN = <span class="number">100</span>;</span><br><span class="line"><span class="type">int</span> ary[LEN];</span><br></pre></td></tr></table></figure>
+
+<p>  这是原封不动的编译错误输出： </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">D:\Src\c\<span class="built_in">test</span>\mem\part3&gt;cl demo6.c</span><br><span class="line">用于 x86 的 Microsoft (R) C/C++ 优化编译器 19.33.31630 版</span><br><span class="line">版权所有(C) Microsoft Corporation。保留所有权利。</span><br><span class="line"></span><br><span class="line">demo6.c</span><br><span class="line">demo6.c(6): error C2057: 应输入常量表达式</span><br><span class="line">demo6.c(6): error C2466: 不能分配常量大小为 0 的数组</span><br><span class="line">demo6.c(6): error C2133: “ary”: 未知的大小</span><br></pre></td></tr></table></figure>
+
+<p>  这个就很不可理解了， 难道const常量不是常量表达式么？ 这个还真不是。  </p>
+<p>  C语言要求数组的大小必须在编译阶段确定， 而const常量是在程序运行阶段确定的， 所以又叫只读变量。  </p>
+<p>  看这个例子：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> i;</span><br><span class="line"><span class="built_in">scanf</span>(<span class="string">&quot;%d&quot;</span>, &amp;i);</span><br><span class="line"><span class="type">const</span> <span class="type">int</span> ID = i;</span><br></pre></td></tr></table></figure>
+
+<p>  这里ID的值是在运行阶段有用户的输入决定的， 所以在c语言里定义数组的正确姿势是这样： </p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> LEN 100</span></span><br><span class="line"><span class="comment">// 省略</span></span><br><span class="line"><span class="type">int</span> ary[LEN];</span><br></pre></td></tr></table></figure>
+
+<p>  1.为什么数组传递地址？ 为了加快程序运行速度， 虽然不符合人的直觉。  </p>
+<p>2.为什么c语言的数组的大小在编译阶段确定， 而其他语言则可以在运行阶段动态确定？ 因为C语言的数组是在站区分配空间的， 而其他语言也许在战区分配， 也许放在了堆区， 这个就不太好说了， 估计是有一定的分配策略， 比如。 </p>
 <ul>
-<li><p>站区 存放函数的局部变量  轻量级数据为主</p>
+<li><p>分配到战区 数据量比较小， 编译阶段能够确定大小  </p>
 </li>
-<li><p>堆区 存放动态数据， 重量级数据为主  </p>
-</li>
-<li><p>静态区 存放字面量； 全局变量； 静态变量； 只读变量 </p>
-<p>暂时不考虑内存空间的其他区域， 我们这次主题主要要探索站区； 堆区和静态常量区。  </p>
-<p>重中之重是堆区！</p>
+<li><p>分配到堆区 数据量比较大， 编译阶段无法确定大小  </p>
+<p>大家可以在前面的stcakOverflow函数里放一个数组， 然后观察运行结果， 看看栈溢出是不是更快了。</p>
 </li>
 </ul>
-<h3 id="堆区和静态常量区的区别"><a href="#堆区和静态常量区的区别" class="headerlink" title="堆区和静态常量区的区别"></a>堆区和静态常量区的区别</h3><p>  通常认为字符串是重量级数据， 所以放在内存的堆区， 但是字符串字面量却放在了静态常量区域。  </p>
-<p>  堆区里的字符串可以随意修改， 而静态常量区的字符串却受保护， 只能读取， 不可修改。  </p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *str1 = <span class="string">&quot;hello&quot;</span>; <span class="comment">// 静态常量区</span></span><br><span class="line"><span class="type">char</span> str2[] = <span class="string">&quot;hello&quot;</span>; <span class="comment">// 堆区</span></span><br></pre></td></tr></table></figure>
-
-<p>  接下来编写一个函数来验证我们的猜测, 建议使用Linux最好的发行版Windows10。  </p>
-<p>  为了避免文章过于冗长省略了完整程序。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 原地修改字符串为大写, 需要ctype.h和string.h两个头文件</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">toUpperCase</span><span class="params">(<span class="type">char</span> *s)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">size_t</span> len = <span class="built_in">strlen</span>(s);</span><br><span class="line">  <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; len; i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">islower</span>(s[i]))</span><br><span class="line">    &#123;</span><br><span class="line">      s[i] -= <span class="number">32</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>  然后可以在main函数里测试了</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *s = <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line">toUpperCase(s);</span><br><span class="line">println(<span class="string">&quot;%s\n&quot;</span>, s);</span><br></pre></td></tr></table></figure>
-
-<p>  打开bash编译没有出现错误和警告， 运行的时候出现了问题。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ cc upper.c</span><br><span class="line">$ ./a.out</span><br><span class="line">Segmentation fault (core dumped)</span><br></pre></td></tr></table></figure>
-
-<p>  那么这个Segmentation fault (core dumped)是个什么玩意儿？  </p>
-<p>  程序段故障， 很显然我们修改了不该修改的内存。  </p>
-<p>  改为</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> s[] = <span class="string">&quot;hello world&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>  后编译运行没有任何异常。  </p>
-<p>  所以最后的结论字符串数组在堆区， 可以任意修改， 而字符串常量在静态常量区不可随意修改。</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *s = <span class="string">&quot;hello&quot;</span>;</span><br></pre></td></tr></table></figure>
-
-<p>  这里的*s指针指向了静态常量区的某个空间， </p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
-<li><p>应用程序的内存空间分为了若干部分， 这样可以方便的管理内存空间</p>
+<h3 id="管中窥豹……站区的总结"><a href="#管中窥豹……站区的总结" class="headerlink" title="管中窥豹……站区的总结"></a>管中窥豹……站区的总结</h3><p>  在数据结构里有个重要成员叫站stack， 而我们的函数调用巧妙的利用了站的特点来实现的……  </p>
+<p>  站是一种后进先出的数据类型， 两个重要操作压入push和弹出pop。</p>
+<p>  函数开始调用把所有的局部变量全部压入站里， 函数返回把函数的所有局部变量从站里弹出，  </p>
+<p>  如果你只管压入不给弹出时间长了肯定溢出的， 毕竟它的容量是有限的Windows2mb； Linux8mb，  </p>
+<p>  当然这些东西在编译阶段可以调整， 不过一般情况下默认的大小足够你发挥了。  </p>
+<p>  最后的总结如下， 请牢记！  </p>
+<ul>
+<li><p>战区是函数调用时存取相关局部变量的空间  </p>
 </li>
-<li><p>这些内存区域至少包括站区； 堆区和静态常量区  </p>
+<li><p>最大容量在编译阶段确定， 运行阶段不可超过其最大容量， 超过了就是栈溢出错误  </p>
 </li>
-<li><p>每个区域的使用场景各不相同， 存储的数据量也不相同  </p>
+<li><p>战区在一个连续的内存空间里， 从高地址往低地址增长， 函数返回之后退回到高地址处 </p>
 </li>
-<li><p>静态常量区的内存空间受保护不可修改， 而堆区的内存则可以自由的随意修改 </p>
+<li><p>函数返回后原来被占据的低地址空间被释放， 后续不可随意操作， 只能等待下一次的函数调用  </p>
+<p>函数的调用是不是特别像海浪， 随着程序的运行起起落落， 函数调用潮起； 函数返回潮落； 递归调用钱塘江大潮； 栈溢出海啸！</p>
+<p>这里我们格外避免两种情况， 其他的有编译器和操作系统帮我们搞定了。  </p>
 </li>
-<li><p>字符串数组保存在堆区， 而指向字符串的字符指针不一定指向了哪里， 也许是静态常量区， 也许是堆区， 或者指向了某个站区上的局部变量， 当然这个局部变量里保存了一个字符  </p>
-<p>下一次我们看看站区和堆区的区别。  </p>
-<p>未完待续……</p>
+<li><p>避免栈溢出， 避免海啸</p>
+</li>
+<li><p>避免访问函数调用结束后的无效地址， 海浪退潮后避免搁浅半死不活 </p>
+<p>避免栈溢出不难， 避免访问无效地址这个就说来话长了， 尤其是扯上指针和堆区更是内存管理的世纪难题。  </p>
+<p>关于这些内容下一次继续， 未完待续……</p>
 </li>
 </ul>
 
@@ -307,9 +302,8 @@
               <a href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag"># C语言</a>
               <a href="/tags/%E6%8C%87%E9%92%88/" rel="tag"># 指针</a>
               <a href="/tags/%E6%95%B0%E7%BB%84/" rel="tag"># 数组</a>
-              <a href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/" rel="tag"># 字符串</a>
               <a href="/tags/%E5%86%85%E5%AD%98/" rel="tag"># 内存</a>
-              <a href="/tags/%E5%A0%86%E5%8C%BA/" rel="tag"># 堆区</a>
+              <a href="/tags/%E6%88%98%E5%8C%BA/" rel="tag"># 战区</a>
           </div>
 
         
@@ -318,13 +312,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2022/09/16/weed-01/" rel="prev" title="weed虚拟机 1.前言">
-      <i class="fa fa-chevron-left"></i> weed虚拟机 1.前言
+    <a href="/2022/09/29/program_and_memory-02/" rel="prev" title="程序和内存 02.站">
+      <i class="fa fa-chevron-left"></i> 程序和内存 02.站
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2022/09/29/program_and_memory-02/" rel="next" title="程序和内存 02.站">
-      程序和内存 02.站 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -383,7 +374,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%86%85%E5%AD%98-01-%E5%88%9D%E6%AD%A5%E8%AE%A4%E8%AF%86%E5%86%85%E5%AD%98"><span class="nav-number">1.</span> <span class="nav-text">程序和内存 01.初步认识内存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E4%B8%96%E7%95%8C%E9%87%8C%E7%9A%84%E5%86%85%E5%AD%98"><span class="nav-number">1.1.</span> <span class="nav-text">程序世界里的内存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E5%8C%BA%E5%92%8C%E9%9D%99%E6%80%81%E5%B8%B8%E9%87%8F%E5%8C%BA%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.2.</span> <span class="nav-text">堆区和静态常量区的区别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%86%85%E5%AD%98-3-%E7%AB%99%E7%BB%AD"><span class="nav-number">1.</span> <span class="nav-text">程序和内存 3.站续</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%AA%E8%A3%85%E6%88%90%E6%95%B0%E7%BB%84%E7%9A%84%E6%8C%87%E9%92%88"><span class="nav-number">1.1.</span> <span class="nav-text">伪装成数组的指针</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8C%E8%AF%AD%E8%A8%80%E9%87%8C%E4%B8%BA%E4%BB%80%E4%B9%88%E5%BF%85%E9%A1%BB%E5%9C%A8%E7%BC%96%E8%AF%91%E9%98%B6%E6%AE%B5%E7%A1%AE%E5%AE%9A%E5%85%B6%E5%A4%A7%E5%B0%8F"><span class="nav-number">1.2.</span> <span class="nav-text">在C语言里为什么必须在编译阶段确定其大小</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AE%A1%E4%B8%AD%E7%AA%A5%E8%B1%B9%E2%80%A6%E2%80%A6%E7%AB%99%E5%8C%BA%E7%9A%84%E6%80%BB%E7%BB%93"><span class="nav-number">1.3.</span> <span class="nav-text">管中窥豹……站区的总结</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
