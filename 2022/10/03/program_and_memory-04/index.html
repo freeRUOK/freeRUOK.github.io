@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="三大内存错误和解决方案的介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="程序和内存 04.堆区">
+<meta property="og:url" content="https://freeruok.github.io/2022/10/03/program_and_memory-04/index.html">
+<meta property="og:site_name" content="Free R U Ok">
+<meta property="og:description" content="三大内存错误和解决方案的介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-10-03T07:00:00.000Z">
+<meta property="article:modified_time" content="2022-10-03T06:49:03.971Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="原创">
+<meta property="article:tag" content="C语言">
+<meta property="article:tag" content="指针">
+<meta property="article:tag" content="heap">
+<meta property="article:tag" content="内存泄漏">
+<meta property="article:tag" content="悬垂指针">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2022/10/03/program_and_memory-04/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>程序和内存 04.堆区 | Free R U Ok</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Free R U Ok</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/10/03/program_and_memory-04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          程序和内存 04.堆区
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-10-03 15:00:00 / 修改时间：14:49:03" itemprop="dateCreated datePublished" datetime="2022-10-03T15:00:00+08:00">2022-10-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%86%85%E5%AD%98/" itemprop="url" rel="index"><span itemprop="name">程序和内存</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">三大内存错误和解决方案的介绍</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="程序和内存-04-堆区"><a href="#程序和内存-04-堆区" class="headerlink" title="程序和内存 04.堆区"></a>程序和内存 04.堆区</h2><p>  如果在一个进程空间里只有一个战区肯定是没有办法完全满足我们的要求的， 因为战区的特点是容量相对较小， 容纳不了大量的动态数据。  </p>
+<p>  关于战区的内容可以回头看前面的文章， 既然战区满足不了就拿出heap堆区来实现这部分的需求。  </p>
+<p>  比如说我们有个需求， 拼接两个字符串, 这里用到的库函数非常重要如果不熟悉好好研究一下， 这里不赘述了, memcpy和strcpy都在string.h头文件里。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *<span class="title function_">str_join</span><span class="params">(<span class="type">char</span> *s1, <span class="type">char</span> *s2)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> result[<span class="number">1024</span>];</span><br><span class="line">  <span class="built_in">memcpy</span>(result, s1, <span class="built_in">strlen</span>(s1));</span><br><span class="line">  <span class="built_in">strcpy</span>(result + <span class="built_in">strlen</span>(s1), s2);</span><br><span class="line"><span class="comment">//  printf(&quot;%s\n&quot;, result);</span></span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// main</span></span><br><span class="line">  <span class="type">char</span> *s = str_join(<span class="string">&quot;hello,&quot;</span>, <span class="string">&quot;world&quot;</span>);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, s);</span><br></pre></td></tr></table></figure>
+
+<p>  编译阶段出现了警告， 返回了无效的局部变量的地址。  </p>
+<p>  从运行结果可以看出函数业务逻辑没有问题的， 但是返回的时候出现了问题，  </p>
+<p>  我们知道函数内部的数组是放在了战区， 所以函数返回之后result变量就销毁了， 自然而然它的地址也无效了， 你返回了局部变量的地址就是严重错误， </p>
+<h3 id="堆区heap-初体验"><a href="#堆区heap-初体验" class="headerlink" title="堆区heap 初体验"></a>堆区heap 初体验</h3><p>  所以我们就需要heap来存取result里的内容， heap空间可以用C语言的malloc函数来申请内存空间。  </p>
+<p>  如下是改进后的str_join函数， malloc函数在stdlib.h头文件里, 此外这里没有处理错误情况。  </p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *<span class="title function_">str_join</span><span class="params">(<span class="type">char</span> *s1, <span class="type">char</span> *s2)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *result = (<span class="type">char</span> *)<span class="built_in">malloc</span>(<span class="built_in">strlen</span>(s1) + <span class="built_in">strlen</span>(s2) + <span class="number">1</span>);</span><br><span class="line">  <span class="built_in">memcpy</span>(result, s1, <span class="built_in">strlen</span>(s1));</span><br><span class="line">  <span class="built_in">strcpy</span>(result + <span class="built_in">strlen</span>(s1), s2);</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, result);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  现在编译运行一切完美， 改动的地方只有一个把数组替换成了申请heap空间。  </p>
+<p>  前面我们讲过的内存空间都是编译阶段已经确定好大小的， 而heap按需使用， 用的时候申请malloc， 用完了释放free，  </p>
+<p>  理论上heap空间管够， 要多少给多少， 只要有空闲内存就给你用， 即便没有空闲内存， 也把内存上的东西挪到磁盘上， 腾出空间之后给你用， 当然磁盘上的也满了就没办法了， 因为我们知道磁盘上的虚拟内存也是有限的么。</p>
+<p>  这个和借钱特别相似， 借钱的时候特别爽快， 还钱的时候各种幺蛾子。  </p>
+<p>  heap好用确实好用但是带来了三个关于内存的三大错误。  </p>
+<ul>
+<li>内存泄漏 你申请malloc过来的heap空间没有释放free掉， 如果这个程序长期运行的话肯定出现问题， 比如我们知道电子设备运行一段时间后重启一下比较好， 现在重启的周期越来越长了， 也许这背后是垃圾回收算法的进步, 当然内存也越来越大了所以内存泄漏一点点无所谓，   </li>
+<li>重复释放， 比如一块heap空间已经free掉了， 然后程序再次free这块空间， 本来你家房子已经拆迁， 在原地重建好了， 然后拆迁办的犯错再来一次拆迁你家新房子， 你说这严重不严重 </li>
+<li>悬垂指针 访问已经free掉后的heap空间， 从前你加楼下有个诊所， 有一天你突然身体难受火急火燎的过去找这个诊所， 发现诊所已经搬迁了或者倒闭了</li>
+</ul>
+<h3 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h3><p>  三个内存错误里内存泄漏算是轻的了， 因为程序退出后所有的空间都被收回去了， 这里包括了你申请完后没有及时释放的， </p>
+<p>  如果你的程序运行时间特别短， 那么可以不释放 heap空间， 当然不提倡这样编写程序！  </p>
+<p>  如果你的程序7*24小时不间断运行， 那么内存泄漏就是重大bug， 接下来感受一下内存泄漏的威力， 还是继续使用str_join函数， 去掉里面的printf输出！ </p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> *s = str_join(<span class="string">&quot;hello,&quot;</span>, <span class="string">&quot;world&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  内存使用率到达90%后赶紧按下CTRL+c杀死这个进程， 或者放在虚拟机里运行， 否则可能要重启电脑了！  </p>
+<p>  这里是一个简单演示而已， 真是世界的软件内存泄漏肯定是非常复杂， 难以发现和修复。  </p>
+<h3 id="悬垂指针"><a href="#悬垂指针" class="headerlink" title="悬垂指针"></a>悬垂指针</h3><p>  这里我们用随机函数来演示一下悬垂指针。  </p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">char</span> *s = str_join(<span class="string">&quot;hello,&quot;</span>, <span class="string">&quot;world&quot;</span>);</span><br><span class="line">srand((<span class="type">unsigned</span> <span class="type">long</span>)time(<span class="literal">NULL</span>));</span><br><span class="line"><span class="keyword">if</span> (rand() % <span class="number">100</span> &lt;= <span class="number">50</span>)</span><br><span class="line">&#123;</span><br><span class="line">  <span class="built_in">free</span>(s);</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;%s\n&quot;</span>, s);</span><br></pre></td></tr></table></figure>
+
+<p>  多运行几次， 感受一下悬垂指针。  </p>
+<p>  重复释放也和悬垂指针一样， 这里就不展开了。  </p>
+<p>  那么我们知道只有c&#x2F;c++手动申请和释放heap空间， 其他语言是如何解决这些问题的？ 我们已经习惯使用new， 想new多少就new多少， 从来没有关心过这些heap是怎么被释放的！  </p>
+<p>  顶多学习某个编程语言介绍的时候看到xx语言使用了自动垃圾回收技术， 免去了你手动管理内存的痛苦。  </p>
+<h3 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h3><p>  绝大多数的现代编程语言无一例外的使用了自动垃圾回收技术。  </p>
+<p>  垃圾回收的好处在于你毫无负担的尽情使用heap空间就可以了， 什么内存泄漏； 悬垂指针这些麻烦全部丢给垃圾收集器来负责。  </p>
+<p>  但是垃圾收集器运行的时候需要额外的性能开销， 你想想这个东西一直在扫描哪个heap已经没用了， 如果发现某个heap空间没用了就释放这块空间。  </p>
+<p>  所以在某些场景下垃圾收集器不是特别适用， 当然我们现在能耳熟能详的高级编程语言都用到了这个技术， 比如：  </p>
+<p>  java; C Sharp; golang； js； python； php； ruby； perl； lua等等等等。  </p>
+<p>  围绕着垃圾收集算法也是百花齐放， 各显神通。  </p>
+<p>  感兴趣可以参考专业文章和图书。  </p>
+<h3 id="rust的特立独行"><a href="#rust的特立独行" class="headerlink" title="rust的特立独行"></a>rust的特立独行</h3><p>  rust是一个崭新的系统编程语言， 自我定位是和C&#x2F;C++一个性质， 火狐浏览器是用rust编写的， 它没有和c&#x2F;c++一样手动管理内存； 也没有和其他主流语言一样使用垃圾回收技术。  </p>
+<p>  rust提出了所有权和生命周期系统来避免内存的三大错误。  </p>
+<p>  当然还包括了rust编译器的严苛的静态分析。  </p>
+<p>  总而言之rust有一套严苛的语法规则， 从而保证编译生成可执行文件后没有任何heap方面的错误。  </p>
+<p>  我之所以编写这一系列文章的目的也是为了学习rust和内存安全, 当然关于rust如何保证内存安全的， 我也是一知半解， 似懂非懂， 所以拿出c语言关于内存方面的知识复习一下， 顺便写下了这些文章。  </p>
+<p>  最后给heap做一个总结， 也是本系列文章的结尾……  </p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li><p>heap空间按需使用， 用完就释放  </p>
+</li>
+<li><p>heap没有正确释放带来了三大内存错误  </p>
+</li>
+<li><p>内存泄漏； 重复释放和悬垂指针  </p>
+</li>
+<li><p>为了避免内存错误出现了自动垃圾收集技术， 绝大多数的现代编程语言都引入了这一技术    </p>
+</li>
+<li><p>最近也有一些内存管理方面的新的技术， rust的所有权生命周期和配套的静态规则 </p>
+<p>万变不离其宗， 如上是关于内存的最少知识量， 作为一个合格的编程爱好者必须要明白……</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8E%9F%E5%88%9B/" rel="tag"># 原创</a>
+              <a href="/tags/C%E8%AF%AD%E8%A8%80/" rel="tag"># C语言</a>
+              <a href="/tags/%E6%8C%87%E9%92%88/" rel="tag"># 指针</a>
+              <a href="/tags/heap/" rel="tag"># heap</a>
+              <a href="/tags/%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F/" rel="tag"># 内存泄漏</a>
+              <a href="/tags/%E6%82%AC%E5%9E%82%E6%8C%87%E9%92%88/" rel="tag"># 悬垂指针</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/10/01/Program_And_Memary-03/" rel="prev" title="程序和内存 03.站续">
+      <i class="fa fa-chevron-left"></i> 程序和内存 03.站续
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%92%8C%E5%86%85%E5%AD%98-04-%E5%A0%86%E5%8C%BA"><span class="nav-number">1.</span> <span class="nav-text">程序和内存 04.堆区</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E5%8C%BAheap-%E5%88%9D%E4%BD%93%E9%AA%8C"><span class="nav-number">1.1.</span> <span class="nav-text">堆区heap 初体验</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">1.2.</span> <span class="nav-text">内存泄漏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%82%AC%E5%9E%82%E6%8C%87%E9%92%88"><span class="nav-number">1.3.</span> <span class="nav-text">悬垂指针</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6"><span class="nav-number">1.4.</span> <span class="nav-text">垃圾回收</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#rust%E7%9A%84%E7%89%B9%E7%AB%8B%E7%8B%AC%E8%A1%8C"><span class="nav-number">1.5.</span> <span class="nav-text">rust的特立独行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.6.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
