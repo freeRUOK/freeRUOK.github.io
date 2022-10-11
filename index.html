@@ -171,6 +171,118 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/10/11/sleep-sort/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/10/11/sleep-sort/" class="post-title-link" itemprop="url">休眠排序法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-10-11 17:28:51 / 修改时间：17:31:31" itemprop="dateCreated datePublished" datetime="2022-10-11T17:28:51+08:00">2022-10-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%92%8CCPU/" itemprop="url" rel="index"><span itemprop="name">程序和CPU</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="休眠排序法"><a href="#休眠排序法" class="headerlink" title="休眠排序法"></a>休眠排序法</h2><p>  接下来咱一起来研究一下多线程加上sleep如何给整数类型的序列排序……  </p>
+<p>  友情提醒， 这只是我们对并发编程的一次探索和学习， 在实际项目里千万可不能这么干。  </p>
+<h3 id="初步实现"><a href="#初步实现" class="headerlink" title="初步实现"></a>初步实现</h3><p>  给序列的每个元素num都单独启动一个线程， 并且传入这个元素num， 线程内部调用：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Thread.sleep(num);</span><br></pre></td></tr></table></figure>
+
+<p>  之后在结果序列尾部添加这个元素num， 语言描述难， 先看看线程类的定义， 这里用到的所有类型都在java.util包里。：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">SortThread</span> <span class="keyword">extends</span> <span class="title class_">Thread</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 在构造方法里传入元素num， result是排序后的结果</span></span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">SortThread</span><span class="params">(<span class="type">int</span> num, List&lt;Integer&gt; result)</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">super</span>();</span><br><span class="line">    <span class="built_in">this</span>.num = num;</span><br><span class="line">    <span class="built_in">this</span>.result = result;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="comment">// 先休眠在添加</span></span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">      Thread.sleep(num);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (InterruptedException e)</span><br><span class="line">    &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    result.add(num);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">private</span> <span class="type">int</span> num;</span><br><span class="line">  <span class="keyword">private</span> List&lt;Integer&gt; result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  上面的SortThread类看着很简单， 接下来给它加上一个静态方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 传入一个List序列， 返回排序后的List序列</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> List&lt;Integer&gt; <span class="title function_">sort</span><span class="params">(List&lt;Integer&gt; nums)</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="type">var</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Integer&gt;();</span><br><span class="line">    <span class="type">var</span> <span class="variable">threads</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SortThread</span>[nums.size()];  <span class="comment">// nums有多少元素就创建多少线程</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; threads.length; i++)</span><br><span class="line">    &#123;</span><br><span class="line">      threads[i] = <span class="keyword">new</span> <span class="title class_">SortThread</span>(nums.get(i), result);</span><br><span class="line">      threads[i].start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">try</span></span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">// 等待所有任务运行结束</span></span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">var</span> thread : threads)</span><br><span class="line">      &#123;</span><br><span class="line">        thread.join();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">catch</span> (InterruptedException e)</span><br><span class="line">    &#123;</span><br><span class="line">      e.printStackTrace();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>  这样算是把休眠排序写好了， 接下来在我们的Main类里测试：</p>
+<h3 id="编写测试任务"><a href="#编写测试任务" class="headerlink" title="编写测试任务"></a>编写测试任务</h3><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="comment">// main方法， 第一步初始化一个list序列， 填充随机数</span></span><br><span class="line">    <span class="type">var</span> <span class="variable">nums</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Integer&gt;();</span><br><span class="line">    <span class="type">var</span> <span class="variable">random</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Random</span>();</span><br><span class="line">    System.out.println(<span class="string">&quot;随机序列长度&quot;</span>);</span><br><span class="line">    <span class="type">int</span> <span class="variable">len</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Scanner</span>(System.in).nextInt();</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; len; i++)</span><br><span class="line">    &#123;</span><br><span class="line">      nums.add(random.nextInt(<span class="number">1000</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 运行排序任务， 顺便记录运行时间</span></span><br><span class="line">    <span class="type">long</span> <span class="variable">beginTime</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">    <span class="type">var</span> <span class="variable">result</span> <span class="operator">=</span> SortThread.sort(nums);</span><br><span class="line">    System.out.printf(<span class="string">&quot;用时： %d毫秒\n&quot;</span>, System.currentTimeMillis() - beginTime);</span><br><span class="line">    <span class="comment">// 验证运行后的排序情况， 记录错误排序； 顺便输出错误排序具体数值</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">invalid</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; result.size(); i++)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="type">int</span> <span class="variable">left</span> <span class="operator">=</span> result.get(i - <span class="number">1</span>);</span><br><span class="line">      <span class="type">int</span> <span class="variable">right</span> <span class="operator">=</span> result.get(i);</span><br><span class="line">      <span class="keyword">if</span> (left &gt; right)</span><br><span class="line">      &#123;</span><br><span class="line">System.out.printf(<span class="string">&quot;%d, %d\n&quot;</span>, left, right);</span><br><span class="line">        invalid++;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 输出运行结果</span></span><br><span class="line">    <span class="type">String</span> <span class="variable">fmt</span> <span class="operator">=</span> <span class="string">&quot;成功&quot;</span>;</span><br><span class="line">    <span class="keyword">if</span> (invalid != <span class="number">0</span>) fmt = String.format(<span class="string">&quot;排序失败： 比率%.2f%%\n&quot;</span>, (invalid + <span class="number">0.0</span>) / nums.size() * <span class="number">100</span>);</span><br><span class="line">    <span class="comment">// ArrayList线程不安全所以多个线程访问的时候出现问题， 比如丢失元素</span></span><br><span class="line">    <span class="keyword">if</span> (nums.size() != result.size()) fmt = String.format(<span class="string">&quot;%s丢失率%.2f%%&quot;</span>, (fmt.equals(<span class="string">&quot;成功&quot;</span>)? <span class="string">&quot;失败： &quot;</span>: fmt), (nums.size() - result.size() + <span class="number">0.0</span>) / nums.size() * <span class="number">100</span>);</span><br><span class="line">    System.out.println(fmt);</span><br></pre></td></tr></table></figure>
+
+<p>  运行看看， 错误排序比例高； 结果序列的丢失元素比例也相对严重， 接下来我们给结果序列加上一把锁。  </p>
+<h3 id="synchronised关键字"><a href="#synchronised关键字" class="headerlink" title="synchronised关键字"></a>synchronised关键字</h3><p>  修改SortThread.run方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// .....</span></span><br><span class="line">  <span class="keyword">synchronized</span> (result)</span><br><span class="line">  &#123;</span><br><span class="line">    result.add(num);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  我们在多个线程同时访问的地方加上代码块， 而且用synchronized关键字修饰result变量。  </p>
+<p>  再次编译运行， 不会出现结果result丢失元素的情况了。  </p>
+<h3 id="改用CopyOnWriteArrayList"><a href="#改用CopyOnWriteArrayList" class="headerlink" title="改用CopyOnWriteArrayList"></a>改用CopyOnWriteArrayList</h3><p>  当然遇到这样的场景优先可以选择java.util.concurrent包下的线程安全的List实现。  </p>
+<p>  比如这里把</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="type">var</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;Integer&gt;();</span><br><span class="line">替换为</span><br><span class="line"><span class="type">var</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CopyOnWriteArrayList</span>&lt;Integer&gt;();</span><br></pre></td></tr></table></figure>
+
+<p>  这样可以去掉synchronized快， 而且无需改写代码， 因为CopyOnWriteArrayList实现了List接口。  </p>
+<h3 id="最终版本"><a href="#最终版本" class="headerlink" title="最终版本"></a>最终版本</h3><p>  所以最后我们的程序变成了这样。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span></span><br><span class="line">  &#123;</span><br><span class="line">.....</span><br><span class="line">    result.add(num);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> List&lt;Integer&gt; <span class="title function_">sort</span><span class="params">(List&lt;Integer&gt; nums)</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="type">var</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CopyOnWriteArrayList</span>&lt;Integer&gt;();</span><br><span class="line">.....</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<p>  虽然解决了数据丢失的情况， 但是错误排序还没解决， 为此我做了两个改进， 结果依然让人不满意, 在run方法里。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 错误排序比例没有明显减少</span></span><br><span class="line">      <span class="keyword">if</span> (result.size() &gt; <span class="number">1</span> &amp;&amp; result.get(result.size() - <span class="number">1</span>) &gt; num)</span><br><span class="line">    &#123;</span><br><span class="line">        result.add(result.size() - <span class="number">2</span>, num);</span><br><span class="line">    &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        result.add(num);</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 这里用2显然影响不了最终结果， 除非用更大的数字</span></span><br><span class="line">Thread.sleep(num * <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<p>  结果还是不行， 最后做个总结</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>  我电脑CPU4核心8线程； 给40到50个元素排序还是能成功的， 超过60个元素一次都没有成功过， 在双核云主机上运行可能也就给20来个元素排序还差不多， 再多就不行了。  </p>
+<p>  首先线程的运行顺序是有操作系统来调度的， 有着很大的随机性， 然后sleep方法不是特别精确， 只要有误差可能就影响到排序结果了。  </p>
+<p>  此外我们通过这个例子看到了在并发编程的时候多个线程共享数据出现的问题。  </p>
+<p>  比如add方法添加元素， 这是分成了好几部来完成的， 1.确定索引， 2.保存元素， 如果只有一个线程不会出现问题， 但是多个线程共享的时候问题就来了。  </p>
+<p>  第一个线程确定第八个位置是空闲的， 然后操作系统切换线程， 让第一个线程等待， 让第二个线程运行， 第二个线程也一样确定第8个位置是空闲的， 随后这两个线程都把数据放在了第8个位置。  </p>
+<p>  这样以来第一个线程或者第二个线程的数据被对方的数据覆盖了， 谁覆盖谁这个也要看操作系统的线程调度， 反正先运行的被后面的覆盖掉。</p>
+<p>  所以出现了线程锁的概念， synchronised不允许两个线程同时访问一个代码块。  </p>
+<p>  好比以前上厕所卫生间锁不了门， 有了synchronised就是有了一把锁， 现在卫生间里只允许一个人进去， 其他人在外面等着， 里面的人出来后其他人在按照顺序进去。  </p>
+<p>  此外java也提供了线程安全的并发数据结构， 在Java.util.concurrent包里， 在并发程序里应该优先使用。  </p>
+<p>  写程序的时候我们需要和两个非常重要的计算机硬件打交道， 内存和CPU， 随着垃圾回收算法的广泛使用我们如何管理内存这个难题算是非常圆满的解决了， 内存空间敞开了用就行了， 其他问题无序关心。  </p>
+<p>  但是怎么在多核CPU下编程却越来越紧迫了， 似乎还没有出现和垃圾回收算法同等的并发编程技术， 这个方面我还有很多东西要探索……</p>
+<p>  这是我程序和CPU系列文章的第一篇， 后续会分享其他有意思的并发编程方面的文章。  </p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2022/10/03/program_and_memory-04/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1249,20 +1361,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-count">15</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">6</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">36</span>
+        <span class="site-state-item-count">41</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
