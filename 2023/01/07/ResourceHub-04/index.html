@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="python类型注解mypy以及pytest测试入门">
+<meta property="og:type" content="article">
+<meta property="og:title" content="写一个资源共享服务 03.提升效率——mypy和pytest">
+<meta property="og:url" content="https://freeruok.github.io/2023/01/07/ResourceHub-04/index.html">
+<meta property="og:site_name" content="Free R U Ok">
+<meta property="og:description" content="python类型注解mypy以及pytest测试入门">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-01-07T13:40:00.000Z">
+<meta property="article:modified_time" content="2023-01-07T13:41:51.004Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="原创">
+<meta property="article:tag" content="类型注解">
+<meta property="article:tag" content="mypy">
+<meta property="article:tag" content="pytest">
+<meta property="article:tag" content="提升开发效率">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2023/01/07/ResourceHub-04/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>写一个资源共享服务 03.提升效率——mypy和pytest | Free R U Ok</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Free R U Ok</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2023/01/07/ResourceHub-04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          写一个资源共享服务 03.提升效率——mypy和pytest
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-01-07 21:40:00 / 修改时间：21:41:51" itemprop="dateCreated datePublished" datetime="2023-01-07T21:40:00+08:00">2023-01-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%86%99%E4%B8%80%E4%B8%AA%E8%B5%84%E6%BA%90%E5%85%B1%E4%BA%AB%E6%9C%8D%E5%8A%A1/" itemprop="url" rel="index"><span itemprop="name">写一个资源共享服务</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">python类型注解mypy以及pytest测试入门</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="写一个资源服务-04-有效提高开发效率"><a href="#写一个资源服务-04-有效提高开发效率" class="headerlink" title="写一个资源服务-04.有效提高开发效率"></a>写一个资源服务-04.有效提高开发效率</h2><p>  都第四个文章了， 还没有进入政体， 是不是觉得特别拖沓呢？  </p>
+<p>  实际上我在开篇的时候交代过， 这次想要把这个系列的文章写的细一点， 所以给人感觉比较琐碎， 但我觉得新手需要这些细节方面的知识！</p>
+<p>  此外去年的十二月份事情比较多， 而且被COVID-19清洗， 耽误了很多时间……  </p>
+<p>  接下来我们看一下在python里如何对源代码做静态分析和运行测试发现潜在的bug； 提高开发效率。  </p>
+<h3 id="静态分析"><a href="#静态分析" class="headerlink" title="静态分析"></a>静态分析</h3><p>  我们知道python是一个动态类型的语言， 很多严重的错误只能在运行阶段暴露， 比如你写错了某个函数的参数类型， 必须实际运行的时候才能发现这一错误。  </p>
+<p>  而静态类型的语言在编译阶段发现大量的类似错误， 这样在编译器的帮助下很快修正错误， 而动态类型的语言为了发现这些错误各种折腾， 费时费力。  </p>
+<p>  那么python有没有办法在运行程序之前检测这些错误？ 答案是肯定的， 我们需要借助于python类型注解和mypy工具来达到这一目的。  </p>
+<h4 id="类型注解"><a href="#类型注解" class="headerlink" title="类型注解"></a>类型注解</h4><p>  所谓的类型注解就是给python代码添加类型信息， 比如以前的函数是这样定义：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a, b</span>):</span><br><span class="line">  <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p>  有了类型注解后变成这样：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p>  这样就特别像rust的函数定义了， 如果你有C系列语言的经验的话可能有点不适应：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">add</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  这是传统的做法， 类型在前； 名称在后， 但是比较新的编程语言把位置换过来了。  </p>
+<p>  不管怎么说有类型注解就是好事， 但是python在运行程序之前并不会检查类型， 换句话说就是运行程序的时候加不加类型注解并无任何区别， 类型注解只是给人看的。  </p>
+<h4 id="mypy类型静态检查工具"><a href="#mypy类型静态检查工具" class="headerlink" title="mypy类型静态检查工具"></a>mypy类型静态检查工具</h4><p>  但是有人实现了<br><a target="_blank" rel="noopener" href="https://github.com/python/mypy">mypy</a><br>静态类型分析工具。  </p>
+<p>  mypy有助于您正确使用变量和函数， 如果试图传递错误类型mypy发出警告。  </p>
+<p>如下是一个简单例子：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line">r: <span class="built_in">str</span> = add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="built_in">print</span>(add(<span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(add(<span class="string">&quot;hello&quot;</span>, <span class="number">2</span>))</span><br><span class="line">r: <span class="built_in">float</span> = add(<span class="number">40</span>, <span class="number">50</span>)</span><br></pre></td></tr></table></figure>
+<p>  如果这段代码直接运行的话报错， 第二行<br>TypeError: can only concatenate str (not “int”) to str&#96;&#96;&#96;</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line">  但是这个错误信息不是真正的bug， 我们确定函数本身没有任何问题， 只是调用函数的时候传入错误类型而已。  </span><br><span class="line"></span><br><span class="line">  接下来用mypy来分析看看输出结果, mypy直接用pip安装就可以了：</span><br><span class="line"></span><br><span class="line">```bash</span><br><span class="line">$ mypy add.py</span><br><span class="line">add.py:4: error: Incompatible types in assignment (expression has type &quot;int&quot;, variable has type &quot;str&quot;)</span><br><span class="line">add.py:6: error: Argument 1 to &quot;add&quot; has incompatible type &quot;str&quot;; expected &quot;int&quot;</span><br><span class="line">add.py:7: error: Name &quot;r&quot; already defined on line 4</span><br><span class="line">Found 3 errors in 1 file (checked 1 source file)</span><br></pre></td></tr></table></figure>
+
+<p>  三个错误都发现了， 确实很好用很强大。  </p>
+<ul>
+<li><p>第四行， 试图给str类型赋int值</p>
+</li>
+<li><p>第六行试图调用str类型的参数， 正确类型是int</p>
+</li>
+<li><p>第七行试图重复定义r变量</p>
+<p>根据mypy提示修改后的代码：</p>
+</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  <span class="keyword">return</span> a + b</span><br><span class="line"></span><br><span class="line">r: <span class="built_in">int</span> = add(<span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line"><span class="built_in">print</span>(add(<span class="number">1</span>, <span class="number">1</span>))</span><br><span class="line"><span class="built_in">print</span>(add(<span class="number">10</span>, <span class="number">2</span>))</span><br><span class="line">r = add(<span class="number">40</span>, <span class="number">50</span>)</span><br></pre></td></tr></table></figure>
+<p>  在次mypy检查：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ mypy add.py</span><br><span class="line">Success: no issues found <span class="keyword">in</span> 1 <span class="built_in">source</span> file</span><br></pre></td></tr></table></figure>
+
+<p>  接下来可以放心运行程序了， 如果没有类型注解和mypy编写函数的时候需要大量的输入验证代码， 如同这样的语句：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">add</span>(<span class="params">a, b</span>):</span><br><span class="line">  <span class="keyword">if</span> <span class="built_in">isinstance</span>(a, <span class="built_in">int</span>) <span class="keyword">and</span> <span class="built_in">isinstance</span>(b, <span class="built_in">int</span>):</span><br><span class="line">    <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p>  实际应用场景只会更复杂更繁琐。  </p>
+<p>所以以后python也可以和静态类型语言一样  玩耍了……  </p>
+<h3 id="测试入门"><a href="#测试入门" class="headerlink" title="测试入门"></a>测试入门</h3><p>  其实测试这样一个主题的范畴特别大， 这里我们使用一些自动化工具来验证程序的正确性， 打个比方。  </p>
+<p>  python字符串有个lower方法， 它把字符串转换为小写形式。  </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">&quot;Hello&quot;</span>.lower() == <span class="string">&quot;hello&quot;</span></span><br><span class="line"><span class="literal">True</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">&quot;hello&quot;</span>.lower() != <span class="string">&quot;HELLO&quot;</span></span><br><span class="line"><span class="literal">True</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">&quot;HELLO&quot;</span>.lower() == <span class="string">&quot;Hello&quot;</span></span><br><span class="line"><span class="literal">False</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="string">&quot;HELLO&quot;</span>.lower() == <span class="string">&quot;HELLO&quot;</span></span><br><span class="line"><span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<p>  这是最原始； 最简陋的四组测试用例， 两组成功； 两组失败， 通过率50%。  </p>
+<p>  如果测试简单程序完全可以这样手动编写， 但是遇到有一定规模的程序这样搞肯定是得不偿失的。  </p>
+<p>  所以人们发展出了自动化测试工具， 比如说python的测试工具pytest。  </p>
+<h4 id="pytest"><a href="#pytest" class="headerlink" title="pytest"></a>pytest</h4><p>pytest也是用pip安装即可……  </p>
+<pre><code>我们有个函数addUInt相加无符号整数， 如果传入有符号整数引发ValueError异常：
+</code></pre>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">addUInt</span>(<span class="params">a: <span class="built_in">int</span>, b: <span class="built_in">int</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  <span class="keyword">if</span> a &lt; <span class="number">0</span> <span class="keyword">or</span> b &lt; <span class="number">0</span>:</span><br><span class="line">    <span class="keyword">raise</span> ValueError(<span class="string">&quot;输入不能为负数&quot;</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> a + b</span><br></pre></td></tr></table></figure>
+
+<p>  接下来给这个函数编写pytest测试用例， 测试用例的名称用test开头， 包括文件名； 类名； 函数名， 只要用test开头， 那么pytest工具自动查找运行这些用例。  </p>
+<p>  我们的addUInt函数在full.py文件里， 而测试用例在test_full.py文件里。  </p>
+<p>  测试用例如下：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> pytest</span><br><span class="line"><span class="keyword">from</span> full <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test_addUInt</span>():</span><br><span class="line">  <span class="keyword">assert</span> addUInt(<span class="number">1</span>, <span class="number">1</span>) == <span class="number">2</span></span><br><span class="line">  <span class="keyword">assert</span> addUInt(<span class="number">1</span>, <span class="number">1</span>) != <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test_addUInt_ValueError</span>():</span><br><span class="line">  <span class="keyword">with</span> pytest.raises(ValueError):</span><br><span class="line">    addUInt(-<span class="number">1</span>, <span class="number">100</span>)</span><br></pre></td></tr></table></figure>
+
+<p>  首先第一个测试函数用assert来断言表达式， 如果表达式结果为true测试通过， 否则测试失败， 而第二个函数如果剖出ValueError异常测试通过， 否则测试失败。  </p>
+<p>  接下来看看测试运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pytest</span><br><span class="line">================================================= <span class="built_in">test</span> session starts =================================================</span><br><span class="line">platform win32 -- Python 3.10.4, pytest-7.1.3, pluggy-1.0.0</span><br><span class="line">rootdir: 测试文件夹</span><br><span class="line">collected 2 items</span><br><span class="line"></span><br><span class="line">test_full.py ..                                                                                                  [100%]</span><br><span class="line"></span><br><span class="line">================================================== 2 passed <span class="keyword">in</span> 0.02s ==================================================</span><br></pre></td></tr></table></figure>
+
+<p>  继续给test_full.py添加两个失败测试：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">test_faile1</span>():</span><br><span class="line">  <span class="keyword">assert</span> addUInt(<span class="number">48</span>, <span class="number">52</span>) == <span class="number">101</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test_faile2</span>():</span><br><span class="line">  <span class="keyword">with</span> pytest.raises(ValueError):</span><br><span class="line">    addUInt(<span class="number">20</span>, <span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>  加上了两个失败用例， 看看这次运行结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ pytest</span><br><span class="line">================================================= <span class="built_in">test</span> session starts =================================================</span><br><span class="line">platform win32 -- Python 3.10.4, pytest-7.1.3, pluggy-1.0.0</span><br><span class="line">rootdir: 测试路径</span><br><span class="line">collected 4 items <span class="comment"># 用例总数</span></span><br><span class="line"></span><br><span class="line">test_full.py ..FF                                                                                                [100%] <span class="comment"># pytest在某些条件下跳过某些用例</span></span><br><span class="line"></span><br><span class="line">====================================================== FAILURES ======================================================= <span class="comment"># 失败用例</span></span><br><span class="line">_____________________________________________________ test_faile1 _____________________________________________________</span><br><span class="line"></span><br><span class="line">    def test_faile1():</span><br><span class="line">&gt;     assert addUInt(48, 52) == 101 <span class="comment"># 表达式</span></span><br><span class="line">E     assert 100 == 101 <span class="comment"># 表达式实际运行结果</span></span><br><span class="line">E      +  <span class="built_in">where</span> 100 = addUInt(48, 52)</span><br><span class="line"></span><br><span class="line">test_full.py:14: AssertionError</span><br><span class="line">_____________________________________________________ test_faile2 _____________________________________________________</span><br><span class="line"></span><br><span class="line">    def test_faile2():</span><br><span class="line">&gt;     with pytest.raises(ValueError):</span><br><span class="line">E     Failed: DID NOT RAISE &lt;class <span class="string">&#x27;ValueError&#x27;</span>&gt; <span class="comment"># 期待出现异常， 实际没有出现异常， 所以失败了</span></span><br><span class="line"></span><br><span class="line">test_full.py:18: Failed</span><br><span class="line"><span class="comment"># 用例失败原因摘要</span></span><br><span class="line">=============================================== short <span class="built_in">test</span> summary info ===============================================</span><br><span class="line">FAILED test_full.py::test_faile1 - assert 100 == 101</span><br><span class="line">FAILED test_full.py::test_faile2 - Failed: DID NOT RAISE &lt;class <span class="string">&#x27;ValueError&#x27;</span>&gt;</span><br><span class="line">============================================= 2 failed, 2 passed <span class="keyword">in</span> 0.12s =============================================</span><br></pre></td></tr></table></figure>
+
+<p>  可见pytest给出的信息多么全面， 只要根据pytest提供的线索， debug易如反掌， 不过前提是你正确编写测试用例， 如果测试用例有问题那叫病入膏肓； 错上加错……  </p>
+<p>  需要补充的是上面介绍的两个工具都有缓存机制， 如果项目规模比较大， 第一次运行需要一定时间， 第二次直接用缓存大幅度加快运行速度。  </p>
+<p>  这些工具的更多用法键后续文章。  </p>
+<p>  未完待续……</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8E%9F%E5%88%9B/" rel="tag"># 原创</a>
+              <a href="/tags/%E7%B1%BB%E5%9E%8B%E6%B3%A8%E8%A7%A3/" rel="tag"># 类型注解</a>
+              <a href="/tags/mypy/" rel="tag"># mypy</a>
+              <a href="/tags/pytest/" rel="tag"># pytest</a>
+              <a href="/tags/%E6%8F%90%E5%8D%87%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87/" rel="tag"># 提升开发效率</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/05/ResourceHub-03/" rel="prev" title="写一个资源共享服务 03.python里的sqlite3">
+      <i class="fa fa-chevron-left"></i> 写一个资源共享服务 03.python里的sqlite3
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E4%B8%80%E4%B8%AA%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1-04-%E6%9C%89%E6%95%88%E6%8F%90%E9%AB%98%E5%BC%80%E5%8F%91%E6%95%88%E7%8E%87"><span class="nav-number">1.</span> <span class="nav-text">写一个资源服务-04.有效提高开发效率</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%88%86%E6%9E%90"><span class="nav-number">1.1.</span> <span class="nav-text">静态分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB%E5%9E%8B%E6%B3%A8%E8%A7%A3"><span class="nav-number">1.1.1.</span> <span class="nav-text">类型注解</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mypy%E7%B1%BB%E5%9E%8B%E9%9D%99%E6%80%81%E6%A3%80%E6%9F%A5%E5%B7%A5%E5%85%B7"><span class="nav-number">1.1.2.</span> <span class="nav-text">mypy类型静态检查工具</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%85%A5%E9%97%A8"><span class="nav-number">1.2.</span> <span class="nav-text">测试入门</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#pytest"><span class="nav-number">1.2.1.</span> <span class="nav-text">pytest</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">20</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
