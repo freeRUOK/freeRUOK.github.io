@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="简易文件加解密工具">
+<meta property="og:type" content="article">
+<meta property="og:title" content="用C#写一个最简单的文件加解密小工具">
+<meta property="og:url" content="https://freeruok.github.io/2023/02/27/c_sharp_secret/index.html">
+<meta property="og:site_name" content="Free R U Ok">
+<meta property="og:description" content="简易文件加解密工具">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-02-27T08:46:34.000Z">
+<meta property="article:modified_time" content="2023-02-27T09:31:51.498Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="C#">
+<meta property="article:tag" content="加解密">
+<meta property="article:tag" content="泛型">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2023/02/27/c_sharp_secret/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>用C#写一个最简单的文件加解密小工具 | Free R U Ok</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Free R U Ok</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2023/02/27/c_sharp_secret/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          用C#写一个最简单的文件加解密小工具
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-02-27 16:46:34 / 修改时间：17:31:51" itemprop="dateCreated datePublished" datetime="2023-02-27T16:46:34+08:00">2023-02-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C/" itemprop="url" rel="index"><span itemprop="name">C#</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">简易文件加解密工具</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="用C-编写最简单的文件加解密工具"><a href="#用C-编写最简单的文件加解密工具" class="headerlink" title="用C#编写最简单的文件加解密工具"></a>用C#编写最简单的文件加解密工具</h2><p>  接下来我们用C#编写命令行加解密工具， 顺便看看C#有没有加入好用的语法特性。  </p>
+<p>  C#的发展速度非常快， 几乎加上了我所见过的所有语法特性， 要跟上巨硬的节奏非常不容易， 不过它是开创者。  </p>
+<p>  比如可空类型就是C#首次捣鼓出来的， 当时学习的时候没在意， 后来经过kotlin的发扬光大后发现这语言特性这么香， 避免nullPointerException最好的办法就是尽量不用它。  </p>
+<p>  所以有空可以关注一下C#的最新进展。  </p>
+<p>  书归正传……  </p>
+<h4 id="加解密原理"><a href="#加解密原理" class="headerlink" title="加解密原理"></a>加解密原理</h4><p>  加解密文件实现原理就是替换大法， 比如有这样的字符串：</p>
+<p>2023通过我们的加密后变成这样4245， 这样简单的原理适用于任何计算机文件， 因为文件就是一大串0-255的数字的集合……  </p>
+<p>  我们对文件的每一个数字做一定的运算后得到加密后的文件， 对加密文件的每一个数字做逆运算后得到解密后的文件。  </p>
+<p>  具体而言每一个数字加上3， 解密就是给每一个数字减去3， 那么这里有个问题如果得到的数据大于255不就溢出了么？  </p>
+<p>  我们把0-255这256个值当作一个首尾相连的整体就很好解决溢出问题， 如果得到的值大于255就减去256， 得到的值小于0就加上256。  </p>
+<p>  关于实现思路到此为止， 接下来编码实现！  </p>
+<h3 id="小工具的上下文环境"><a href="#小工具的上下文环境" class="headerlink" title="小工具的上下文环境"></a>小工具的上下文环境</h3><p>  我们通过命令行参数获取目标数据， 包括 动作要解密或加密， 文件路径， 其他必要信息。  </p>
+<p>  处理完成后返回一个结果数据， 动作是否成功， 处理后的结果， 其他必要信息。  </p>
+<p>  为此我们需要一个枚举类型叫Action表示程序的动作， 此外一个泛型类Context里面有三个泛型字段。  </p>
+<p>  看如下代码：</p>
+<h4 id="Action枚举类型"><a href="#Action枚举类型" class="headerlink" title="Action枚举类型"></a>Action枚举类型</h4><figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="built_in">enum</span> Action</span><br><span class="line">&#123;</span><br><span class="line">  ENCRYPTION, </span><br><span class="line">  DECIPHERING, </span><br><span class="line">  HELP, </span><br><span class="line">  ERROR</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  加密、 解密； 帮助和错误， 很好理解。</p>
+<h4 id="Context类"><a href="#Context类" class="headerlink" title="Context类"></a>Context类</h4><figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title">Context</span>&lt;<span class="title">T1</span>, <span class="title">T2</span>, <span class="title">T3</span>&gt;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">Context</span>(<span class="params">T1 first, T2 second, T3 third</span>)</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">this</span>.first = first;</span><br><span class="line">    <span class="keyword">this</span>.second = second;</span><br><span class="line">    <span class="keyword">this</span>.third = third;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">public</span> T1 first &#123; <span class="keyword">get</span>; &#125;</span><br><span class="line">  <span class="keyword">public</span> T2 second &#123; <span class="keyword">get</span>; &#125;</span><br><span class="line">  <span class="keyword">public</span> T3 third &#123; <span class="keyword">get</span>; <span class="keyword">set</span>; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  接下来在Context类的基础上需要两个类型， Target表示目标， Result表示结果。 </p>
+<p>  我们这次用C#的顶层语句， 就像编写脚本语言一样， 不过需要注意的是我们把Action和Context放在源文件的最后。  </p>
+<p>  using语句不变在源程序的开头， 下来是调用main函数， 中间是其他函数定义。  </p>
+<h4 id="Target和Result"><a href="#Target和Result" class="headerlink" title="Target和Result"></a>Target和Result</h4><figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="keyword">using</span> Target = Context&lt;Action, <span class="built_in">string</span>, <span class="built_in">string</span>&gt;;</span><br><span class="line"><span class="keyword">using</span>  Result = Context&lt;<span class="built_in">bool</span>, <span class="built_in">byte</span>[], <span class="built_in">string</span>&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>  这样我们得到了两个上下文类型Target的三个字段分别表示Action动作， string文件路径, string必要信息。  </p>
+<p>  Result的三个字段表示bool处理是否成功, byte数组表示处理结果， string相关信息。  </p>
+<p>  这样一来我们可以使用普通的类一样用Result和Target类型就可以了。  </p>
+<p>  小工具可以这样搞first, second和third不会容易搞混， 如果面对较大项目的时候这样的技巧慎用！  </p>
+<p>  还是老老实实用success, secretContent和msg这样的字段名。  </p>
+<p>  这就是C#的表现力， 本来需要定义类似的两个类型， 现在直接用一个泛型类搞定， 顺便感叹C#using语句的功能特别多， 列举一下我所知的功能列表：</p>
+<ul>
+<li><p>引用命名空间  </p>
+</li>
+<li><p>重命名命名空间类型等  </p>
+</li>
+<li><p>安全释放资源</p>
+</li>
+<li><p>定义新的类型， 存疑</p>
+<p>这样一来我们的准备工作已经顺利完成， 接下来顺着程序的运行轨迹编码实现就可以了。  </p>
+<p>using语句后就是我们的main函数调用</p>
+</li>
+</ul>
+<figure class="highlight c#"><table><tr><td class="code"><pre><span class="line">main(args);</span><br></pre></td></tr></table></figure>
+
+<p>  需要注意的是在顶层语句我们直接使用args变量即可， 无需额外动作……</p>
+<p>  接下来看看main函数是如何运行的。  </p>
+<h4 id="Main函数"><a href="#Main函数" class="headerlink" title="Main函数"></a>Main函数</h4><figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Main</span>(<span class="params"><span class="built_in">string</span>[] querys</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  Target target = ParseTarget(querys); <span class="comment">// 解析命令行参数</span></span><br><span class="line">  <span class="comment">// 开始处理</span></span><br><span class="line">  Result result = target.first <span class="keyword">switch</span> &#123;</span><br><span class="line">    Action.ENCRYPTION =&gt; Encryption(target), </span><br><span class="line">    Action.DECIPHERING =&gt; Deciphering(target), </span><br><span class="line">    _ =&gt; <span class="keyword">new</span> Result(<span class="literal">false</span>, <span class="keyword">new</span> <span class="built_in">byte</span>[<span class="number">0</span>], target.third)</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="comment">// 扫尾, 我们的加密后的文件扩展名是.sec</span></span><br><span class="line">  <span class="keyword">try</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">string</span> path = target.second;</span><br><span class="line">    path = target.first == Action.DECIPHERING? path.Substring(<span class="number">0</span>, path.Length - path.LastIndexOf(<span class="string">&quot;.sec&quot;</span>)): <span class="string">$&quot;<span class="subst">&#123;path&#125;</span>.sec&quot;</span>;</span><br><span class="line">    File.WriteAllBytes(path, result.second);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (Exception e)</span><br><span class="line">  &#123;</span><br><span class="line">    result.third = e.Message;</span><br><span class="line">  &#125;</span><br><span class="line">    Console.WriteLine(result.third);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  这里需要注意的是switch语句， 这样的语法可以去掉case； break， 当然你的case语句有多行的话还是用回传统的编写方式。  </p>
+<h4 id="生成Target对象"><a href="#生成Target对象" class="headerlink" title="生成Target对象"></a>生成Target对象</h4><figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 接受一个字符串数组， 返回Target对象</span></span><br><span class="line"><span class="function">Target <span class="title">ParseTarget</span>(<span class="params"><span class="built_in">string</span>[] querys</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">return</span> querys.Length <span class="keyword">switch</span> &#123;</span><br><span class="line">    <span class="number">0</span> <span class="keyword">or</span> <span class="number">1</span> =&gt; <span class="keyword">new</span> Target(Action.HELP, <span class="string">&quot;&quot;</span>, <span class="string">&quot;用法 选项 文件名\n-e --encryption 文件名 加密该文件\n-d --decipherion 文件名 解密文件&quot;</span>), </span><br><span class="line">    <span class="number">2</span> =&gt; querys[<span class="number">0</span>].ToLower() <span class="keyword">switch</span> &#123;</span><br><span class="line">      <span class="string">&quot;-e&quot;</span> <span class="keyword">or</span> <span class="string">&quot;--encryption&quot;</span> =&gt; <span class="keyword">new</span> Target(Action.ENCRYPTION, querys[<span class="number">1</span>], <span class="string">&quot;加密文件&quot;</span>), </span><br><span class="line">      <span class="string">&quot;-d&quot;</span> <span class="keyword">or</span> <span class="string">&quot;--deciphreing&quot;</span> =&gt; <span class="keyword">new</span> Target(Action.DECIPHERING, querys[<span class="number">1</span>], <span class="string">&quot;解密文件&quot;</span>), </span><br><span class="line">      _ =&gt; <span class="keyword">new</span> Target(Action.ERROR, <span class="string">&quot;&quot;</span>, <span class="string">&quot;错误选项&quot;</span>)</span><br><span class="line">    &#125;, </span><br><span class="line">    _ =&gt; <span class="keyword">new</span> Target(Action.ERROR, <span class="string">&quot;&quot;</span>, <span class="string">&quot;错误选项&quot;</span>)</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  这次是更复杂的switch语句。  </p>
+<p>  命令行参数解析的不算特别精细不过也大差不差。  </p>
+<p>  接下来程序开始调用加解密函数， 特别简单如下所示：</p>
+<h4 id="加解密函数"><a href="#加解密函数" class="headerlink" title="加解密函数"></a>加解密函数</h4><figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="function">Result <span class="title">Encryption</span>(<span class="params">Target target</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 读取目标文件, first表明是否成功</span></span><br><span class="line">  Result result = ReadBytes(target);</span><br><span class="line">  <span class="keyword">if</span> (!result.first)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line">  calculate(result.second, <span class="number">10</span>);  <span class="comment">// 真正加密</span></span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">Result <span class="title">Deciphering</span>(<span class="params">Target target</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  Result result = ReadBytes(target);</span><br><span class="line">  <span class="keyword">if</span> (!result.first)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 真正解密， 加密就是往上加， 解密就是往下减</span></span><br><span class="line">  calculate(result.second, <span class="number">-10</span>);</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  接下来是读取文件的函数：</p>
+<figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="function">Result <span class="title">ReadBytes</span>(<span class="params">Target target</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">try</span></span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">var</span> content = File.ReadAllBytes(target.second);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Result(<span class="literal">true</span>, content, <span class="string">&quot;Ok&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">catch</span> (Exception e)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> Result(<span class="literal">false</span>, <span class="keyword">new</span> <span class="built_in">byte</span>[<span class="number">0</span>], e.Message);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  最后是核心功能， 也特别简单：</p>
+<figure class="highlight c#"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">calculate</span>(<span class="params"><span class="built_in">byte</span>[] buf, <span class="built_in">int</span> num</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="comment">// 计算文件的所有字节</span></span><br><span class="line">  <span class="keyword">for</span> (<span class="built_in">int</span> i = <span class="number">0</span>; i &lt; buf.Length; i++)</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">int</span> b = buf[i] + num;</span><br><span class="line">    <span class="comment">// 保证不溢出</span></span><br><span class="line">    buf[i] = b <span class="keyword">switch</span></span><br><span class="line">    &#123;</span><br><span class="line">      &gt; <span class="number">255</span> =&gt; (<span class="built_in">byte</span>)(b - <span class="number">256</span>), </span><br><span class="line">      &lt; <span class="number">0</span> =&gt; (<span class="built_in">byte</span>)(b + <span class="number">256</span>), </span><br><span class="line">      _ =&gt; (<span class="built_in">byte</span>)b</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  编写一个玩具文件加解密工具就是这么简单轻松。  </p>
+<p>  编译运行看看效果。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt; dotnet run -e hello.txt</span><br><span class="line">Ok</span><br><span class="line">&gt; dotnet run -d hello.txt.sec</span><br><span class="line">Ok</span><br></pre></td></tr></table></figure>
+
+<h4 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h4><p>  这样的工具还有哪些可以优化的空间？</p>
+<p>  至少两个方面需要继续做。  </p>
+<p>1.友好明确的错误提示尤其是这样的用法</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">&gt; secret.exe -d hello.txt</span><br><span class="line">Index and length must refer to a location within the string. (Parameter <span class="string">&#x27;length&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>  这样的提示只有我们自己知道啥情况， 过了几个月恐怕自己也搞不清这意味着什么！  </p>
+<p>2.加入口令， 为了实现简单可以限制密码的长短和类型， 比如必须提供六位数字等。  </p>
+<p>  不怕挑战可以用任意长度和类型的任何密码， 只是算法实现有难度……</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/C/" rel="tag"># C#</a>
+              <a href="/tags/%E5%8A%A0%E8%A7%A3%E5%AF%86/" rel="tag"># 加解密</a>
+              <a href="/tags/%E6%B3%9B%E5%9E%8B/" rel="tag"># 泛型</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/01/07/ResourceHub-04/" rel="prev" title="写一个资源共享服务 03.提升效率——mypy和pytest">
+      <i class="fa fa-chevron-left"></i> 写一个资源共享服务 03.提升效率——mypy和pytest
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8C-%E7%BC%96%E5%86%99%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E6%96%87%E4%BB%B6%E5%8A%A0%E8%A7%A3%E5%AF%86%E5%B7%A5%E5%85%B7"><span class="nav-number">1.</span> <span class="nav-text">用C#编写最简单的文件加解密工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%A7%A3%E5%AF%86%E5%8E%9F%E7%90%86"><span class="nav-number">1.0.1.</span> <span class="nav-text">加解密原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B0%8F%E5%B7%A5%E5%85%B7%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.</span> <span class="nav-text">小工具的上下文环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Action%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.1.1.</span> <span class="nav-text">Action枚举类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Context%E7%B1%BB"><span class="nav-number">1.1.2.</span> <span class="nav-text">Context类</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Target%E5%92%8CResult"><span class="nav-number">1.1.3.</span> <span class="nav-text">Target和Result</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Main%E5%87%BD%E6%95%B0"><span class="nav-number">1.1.4.</span> <span class="nav-text">Main函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%9F%E6%88%90Target%E5%AF%B9%E8%B1%A1"><span class="nav-number">1.1.5.</span> <span class="nav-text">生成Target对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A0%E8%A7%A3%E5%AF%86%E5%87%BD%E6%95%B0"><span class="nav-number">1.1.6.</span> <span class="nav-text">加解密函数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%80%E5%90%8E"><span class="nav-number">1.1.7.</span> <span class="nav-text">最后</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
