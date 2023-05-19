@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="编写一些程序认识字节序， 手工解包或者打包字节数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mp3标签解析和字节序 （上）">
+<meta property="og:url" content="https://freeruok.github.io/2023/05/19/mp3id3v2parser-I/index.html">
+<meta property="og:site_name" content="Free R U Ok">
+<meta property="og:description" content="编写一些程序认识字节序， 手工解包或者打包字节数据">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-19T13:46:13.000Z">
+<meta property="article:modified_time" content="2023-05-19T13:58:47.485Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="原创">
+<meta property="article:tag" content="mp3">
+<meta property="article:tag" content="字节序">
+<meta property="article:tag" content="二进制运算">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2023/05/19/mp3id3v2parser-I/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mp3标签解析和字节序 （上） | Free R U Ok</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Free R U Ok</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2023/05/19/mp3id3v2parser-I/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mp3标签解析和字节序 （上）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-05-19 21:46:13 / 修改时间：21:58:47" itemprop="dateCreated datePublished" datetime="2023-05-19T21:46:13+08:00">2023-05-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">编写一些程序认识字节序， 手工解包或者打包字节数据</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="mp3文件的标签和字节存取顺序"><a href="#mp3文件的标签和字节存取顺序" class="headerlink" title="mp3文件的标签和字节存取顺序"></a>mp3文件的标签和字节存取顺序</h2><p>  接下来我们一起来探索如何从一个mp3文件里解析出相应的标签信息， 比如曲目专辑艺术家发行年份等等。  </p>
+<p>  首先一个mp3 文件本身存取了这些信息， 有的在文件的开头， 有的在文件的结尾。  </p>
+<p>  这些信息有个吓人的名称叫id3， 文件开头的叫id3v2， 文件结尾的叫id3v1， 围绕id3也有一些乱七八糟的术语， 咱先不用理会， 两者的区别也非常明显。</p>
+<p>v一在mp3文件的最后128字节的位置处， 好处就是所有的信息都是固定的， 从头到尾顺序读取就ok了， 坏处就是承载不了多少信息。</p>
+<p>v2好处就是扩展性好， 只要愿意可以把mp3有关的所有信息都塞进里面， 比如曲目的封面和歌词等， 现在这是主流， 坏处就是解析起来比较麻烦而已。  </p>
+<p>  这里我们解析v2版本， v1没什么好说的， 开头的三个固定字符TAG， 紧跟着读取3-32解码字符串， 读取33-62读取解码字符串， 63-92读取解码字符串， 93-96读取解码整数就ok了， 至于第97个字节后面的随意， 我没有看过。  </p>
+<p>  如果你对解析v1没有头绪的话， 看完v2解析原理后手到擒来……  </p>
+<h3 id="字节序……字节存取顺序"><a href="#字节序……字节存取顺序" class="headerlink" title="字节序……字节存取顺序"></a>字节序……字节存取顺序</h3><p>  如果我们在内存上保存一个字符串“hello”， 可以采用两种策略。  </p>
+<p>第一种， 按照我们平常的读写习惯从左至右一个个放置， 这就是所谓的大端序， 也叫网络序。  </p>
+<p>第二种我们从右至左反着来， 比如这样“olleh”， 这个叫小端序， 也叫主机序。  </p>
+<p>  如果你当前CPU平台的字节序和文件里保存的字节序不一样的话我们需要手动转换。  </p>
+<p>  具体编写一个简单程序验证一下我们的想法， 首先找个mp3， 用记事本打开看看开头是不是ID3， 如果不是找一个这样的文件， 当然90%应该都是id3开头的。  </p>
+<p>  然后编写如下python脚本</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">from</span> struct <span class="keyword">import</span> unpack</span><br><span class="line"><span class="comment"># 读取文件第14个字节开始的四个字节数据</span></span><br><span class="line">fp = <span class="built_in">open</span>(<span class="string">&quot;D:/tmp/m1.mp3&quot;</span>, <span class="string">&quot;rb&quot;</span>)</span><br><span class="line">fp.seek(<span class="number">14</span>)</span><br><span class="line">buf = fp.read(<span class="number">4</span>)</span><br><span class="line">fp.close()</span><br><span class="line"><span class="built_in">print</span>(buf)</span><br><span class="line"><span class="comment"># 默认解包， 当前CPU平台， x86_amd64都是小端序， 可以用sys.byteorder来检测</span></span><br><span class="line"><span class="built_in">print</span>(unpack(<span class="string">&quot;i&quot;</span>, buf))</span><br><span class="line"><span class="comment"># 大端序解包</span></span><br><span class="line"><span class="built_in">print</span>(unpack(<span class="string">&quot;&gt;i&quot;</span>, buf))</span><br><span class="line"><span class="comment"># 反转字节序列</span></span><br><span class="line">buf = buf[::-<span class="number">1</span>]</span><br><span class="line"><span class="built_in">print</span>(buf)</span><br><span class="line"><span class="comment">#反转之后再次 默认解包</span></span><br><span class="line"><span class="built_in">print</span>(unpack(<span class="string">&quot;i&quot;</span>, buf))</span><br></pre></td></tr></table></figure>
+
+<p>  输出如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b&#x27;\x00\x00\x00\x1f&#x27;</span><br><span class="line">(520093696,)</span><br><span class="line">(31,)</span><br><span class="line">b&#x27;\x1f\x00\x00\x00&#x27;</span><br><span class="line">(31,)</span><br></pre></td></tr></table></figure>
+
+<p>  从上面的程序运行结果里可以得出如下结论。</p>
+<ul>
+<li><p>mp3文件里存取数据和python变量存取数据不一样， 他们刚好是反过来的</p>
+</li>
+<li><p>所以读取数据的时候不注意很容易出现错误</p>
+<p>我们的python变量使用了小端序， 而mp3采用的是大端序， 我们常见的X86_AMD64架构用的是小端序， ARM不确定， 有的平台可以自行配置。  </p>
+<p>我们常见的JVM dotnet这些平台基本上采用小端序， 我们每天离不开的TCP数据包采用的是大端序， 只是我们没有意识到他们之间的转换而已。  </p>
+<p>我们也不用过于纠结这些玩意儿， 在实战中遇到问题的时候知道有这回事就行了， 在上面的程序里我们用两种办法正确解包了一个int类型的数据。  </p>
+<p>第一个办法是用了struct.unpack方法的格式化说明符&gt; , 第二个办法直接反转数据之后读到的四个字节。  </p>
+<p>在unpack方法里&gt;采用大端序， &lt;采用小端序， 省略平台默认。  </p>
+<p>此外如果你手头没有方便的函数， 可以手动反转。  </p>
+<p>结合上面的程序多看几个文章， 这样我们对这些内容心里有数了……</p>
+</li>
+</ul>
+<h3 id="手工解析二进制"><a href="#手工解析二进制" class="headerlink" title="手工解析二进制"></a>手工解析二进制</h3><p>  如果手头没有struct这样的模块该如何解析二进制数据呢？  </p>
+<p>  首先我们采用稍微笨拙的办法， 这样我们容易理解程序是怎么运行的， 接下来用二进制运算来提高速度， 我这边翻了一番。</p>
+<p>  为了方便我们针对的是int类型的数据， 也就是32bit的四个字节无符号整数， 其他类型完全可以举一反三。  </p>
+<p>  首先看打包， 也就是把一个int值转换为四个字节的二进制数据。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># --*-- Encoding: UTF-8 --*--</span><br><span class="line">import struct</span><br><span class="line">from time import time</span><br><span class="line"></span><br><span class="line">def toBytes(num: int) -&gt; bytes:</span><br><span class="line">  # 直接格式化成二进制字符串</span><br><span class="line">  binStr = &quot;&#123;:032b&#125;&quot;.format(num)</span><br><span class="line">  l = []</span><br><span class="line">  # 分组为四个值， 每一组站八个位</span><br><span class="line">  for i in range(0, len(binStr), 8):</span><br><span class="line">    l.append(int(binStr[i: i + 8], 2))</span><br><span class="line"></span><br><span class="line">  l.reverse()</span><br><span class="line">  return bytes(l)</span><br><span class="line"></span><br><span class="line"># 加快速度</span><br><span class="line">def toBytes1(num: int) -&gt; bytes:</span><br><span class="line">  res = [0, 0, 0, 0]</span><br><span class="line">  for i in range(len(res)):</span><br><span class="line">    # 获取最后8bit值</span><br><span class="line">    res[i] = num &amp; 255</span><br><span class="line">    # 截断最后8bit</span><br><span class="line">    num &gt;&gt;= 8</span><br><span class="line"></span><br><span class="line">  return bytes(res)</span><br><span class="line"># 测试函数</span><br><span class="line">def test(fun):</span><br><span class="line">  s = time()</span><br><span class="line">  for n in range(0, 1000000000, 81):</span><br><span class="line">    buf = fun(n)</span><br><span class="line">    r = struct.unpack(&quot;i&quot;, buf)[0]</span><br><span class="line">    assert(n == r)</span><br><span class="line"></span><br><span class="line">  e = time()</span><br><span class="line">  print(e - s)</span><br><span class="line"></span><br><span class="line">test(toBytes)</span><br><span class="line">test(toBytes1)</span><br></pre></td></tr></table></figure>
+
+<p>  我这边运行良好， 字符串版本28秒， 二进制版本14秒。  </p>
+<p>  那么如何编写一个从字节解包int值的函数呢？</p>
+<p>  原理和我们从1到10嵌套循环里输出1-100的序列没有太大区别。  </p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">toInt</span>(<span class="params">buf: <span class="built_in">bytes</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  num = <span class="number">0</span></span><br><span class="line">  i = <span class="built_in">len</span>(buf)</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(buf) - <span class="number">1</span>, -<span class="number">1</span>, -<span class="number">1</span>):</span><br><span class="line">    n = <span class="number">256</span> ** i</span><br><span class="line">    num += (buf[i] &amp; <span class="number">255</span>) * n</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> num</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">fun</span>):</span><br><span class="line">  s = time()</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, <span class="number">1000000000</span>, <span class="number">81</span>):</span><br><span class="line">    buf = struct.pack(<span class="string">&quot;i&quot;</span>, i)</span><br><span class="line">    r = fun(buf)</span><br><span class="line">    <span class="keyword">assert</span>(i == r)</span><br><span class="line"></span><br><span class="line">  e = time()</span><br><span class="line">  <span class="built_in">print</span>(e - s)</span><br><span class="line"></span><br><span class="line">test(toInt)</span><br></pre></td></tr></table></figure>
+
+<p>  这里我们可以继续扩展， 比如mp3的标签头里保存了所有标签帧的总长度， 所谓的标签帧就是一个个信息块， 他们紧跟着十个字节的标签头的后面。  </p>
+<p>  不能理解的是这个重要数据用28bit来保存， 更麻烦的是每个字节保存了7bit的有效值， 最高位需要丢弃。  </p>
+<p>  那么我们该怎么获取每个有效的7bit值， 然后生成一个int值呢？</p>
+<p>  此外我们如何解包一个long或short值， 遇到负数又该如何。  </p>
+<p>  这些都是有趣的底层知识， 未完待续……</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8E%9F%E5%88%9B/" rel="tag"># 原创</a>
+              <a href="/tags/mp3/" rel="tag"># mp3</a>
+              <a href="/tags/%E5%AD%97%E8%8A%82%E5%BA%8F/" rel="tag"># 字节序</a>
+              <a href="/tags/%E4%BA%8C%E8%BF%9B%E5%88%B6%E8%BF%90%E7%AE%97/" rel="tag"># 二进制运算</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/02/27/c_sharp_secret/" rel="prev" title="用C#写一个最简单的文件加解密小工具">
+      <i class="fa fa-chevron-left"></i> 用C#写一个最简单的文件加解密小工具
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#mp3%E6%96%87%E4%BB%B6%E7%9A%84%E6%A0%87%E7%AD%BE%E5%92%8C%E5%AD%97%E8%8A%82%E5%AD%98%E5%8F%96%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.</span> <span class="nav-text">mp3文件的标签和字节存取顺序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E5%BA%8F%E2%80%A6%E2%80%A6%E5%AD%97%E8%8A%82%E5%AD%98%E5%8F%96%E9%A1%BA%E5%BA%8F"><span class="nav-number">1.1.</span> <span class="nav-text">字节序……字节存取顺序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%8B%E5%B7%A5%E8%A7%A3%E6%9E%90%E4%BA%8C%E8%BF%9B%E5%88%B6"><span class="nav-number">1.2.</span> <span class="nav-text">手工解析二进制</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">60</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
