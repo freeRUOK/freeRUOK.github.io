@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="一个MP3ID3V2解析工具">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mp3标签解析和字节序 （上）">
+<meta property="og:url" content="https://freeruok.github.io/2023/05/27/mp3id3v2parser-II/index.html">
+<meta property="og:site_name" content="Free R U Ok">
+<meta property="og:description" content="一个MP3ID3V2解析工具">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-05-27T04:46:13.000Z">
+<meta property="article:modified_time" content="2023-05-27T04:26:00.083Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="原创">
+<meta property="article:tag" content="mp3">
+<meta property="article:tag" content="ID3">
+<meta property="article:tag" content="文本编码">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2023/05/27/mp3id3v2parser-II/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>mp3标签解析和字节序 （上） | Free R U Ok</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Free R U Ok</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2023/05/27/mp3id3v2parser-II/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mp3标签解析和字节序 （上）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-05-27 12:46:13 / 修改时间：12:26:00" itemprop="dateCreated datePublished" datetime="2023-05-27T12:46:13+08:00">2023-05-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">一个MP3ID3V2解析工具</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="mp3文件的标签和字节存取顺序-下"><a href="#mp3文件的标签和字节存取顺序-下" class="headerlink" title="mp3文件的标签和字节存取顺序 下"></a>mp3文件的标签和字节存取顺序 下</h2><h3 id="在看ID3V2"><a href="#在看ID3V2" class="headerlink" title="在看ID3V2"></a>在看ID3V2</h3><p>  有了字节序有关的铺垫， 解析mp3的id3就简单了。  </p>
+<p>  请注意接下来统一从0开始计数。  </p>
+<p>  首先一个id3v2文件的开头四个字节， 也就是0-3的值固定是：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">b&quot;ID3\x03&quot;</span><br></pre></td></tr></table></figure>
+
+<p>  我们可以用这样的方式判定该文件是否为mp3文件。  </p>
+<p>  文件的6-9保存了mp3所有信息块的总长度， 不包括文件开头的10个字节。  </p>
+<p>  长度占用28bit； 丢弃每个字节的最高位， 大端序。  </p>
+<p>  从第10个字节开始顺序保存每个信息块。  </p>
+<p>  比如第一个信息块从第10个字节开始， 名称站四个字节， 长度站四个字节32bit， 这是和总长度不一样的点。  </p>
+<p>  接下来是两个字节的其他信息， 这里不做解释。  十个字节结束后紧跟着信息块的真正的值。  </p>
+<p>  比如：</p>
+<ul>
+<li><p>10-13 | TIT2(曲目）  </p>
+</li>
+<li><p>14-17 | b\x00\x00\x00\x20长度</p>
+</li>
+<li><p>20-39 | b…..（真正的值）</p>
+<p>如此类推， 信息块的前面十个字节固定长度， 但是后面的值就不固定了， 不过必须至少占用一个字节。  </p>
+<p>所以要想拿到后面的信息块， 那么首先要拿到前面的信息块的长度才行。  </p>
+<p>简单介绍一下id3v2的术语吧。  </p>
+<p>开头的十个字节称之为标签头，  </p>
+<p>接下来是一个个的标签帧， 但是称之为信息块更易懂。  </p>
+<p>帧头占用10个字节， 最前面的4字节是名称， 接下来四字节是长度， 从第10个字节开始就是帧体。  </p>
+<p>我们首先获取值， 而后在解码。  </p>
+<p>id3v2没有采用统一的字符串编码， 我这边大概有140个mp3文件样本， 主流是Unicode和gbk， 此外还有少量的其他编码， 比如UTF-8; ISO-8859-1等等， 可以称得上是五花八门乱七八糟。</p>
+</li>
+</ul>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>  知道了id3后我们大概的思路是这样。  </p>
+<p>1.判断当前文件是否是mp3id3v2，<br>2.获取28bit的标签体长度，<br>3.获取第一个标签帧的名称和长度， 解码帧体里保存的实际值， 定位下一个标签帧的开头，<br>4.重复第三步， 处理完所有的帧为止…… </p>
+<p>  知道怎么搞， 接下来直接编写一个程序实现就好了。  </p>
+<h3 id="完整python代码"><a href="#完整python代码" class="headerlink" title="完整python代码"></a>完整python代码</h3><figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="comment"># --*-- encoding: UTF-8 --*--</span></span><br><span class="line"><span class="keyword">import</span> chardet</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> struct</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义标题， 艺术家 专辑和发行年份</span></span><br><span class="line">TITLE = <span class="string">&quot;TIT2&quot;</span></span><br><span class="line">ARTIST = <span class="string">&quot;TPE1&quot;</span></span><br><span class="line">ALBUM = <span class="string">&quot;TALB&quot;</span></span><br><span class="line">YEAR = <span class="string">&quot;TYER&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 字符串解码</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">decode</span>(<span class="params">buf: <span class="built_in">bytes</span></span>) -&gt; <span class="built_in">str</span>:</span><br><span class="line">  charset = <span class="built_in">str</span>(chardet.detect(buf)[<span class="string">&quot;encoding&quot;</span>])</span><br><span class="line">  <span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">return</span> buf.decode(charset)</span><br><span class="line">  <span class="keyword">except</span>:</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;???&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从二进制序列里提取int值， 丢弃每个字节的最高位</span></span><br><span class="line"><span class="comment"># 效率很低， 这里主要用于调试</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getLengthStr</span>(<span class="params">buf: <span class="built_in">bytes</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  binStr = [<span class="string">&quot;&#123;:08b&#125;&quot;</span>.<span class="built_in">format</span>(b)[<span class="number">1</span>: ] <span class="keyword">for</span> b <span class="keyword">in</span> buf]</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">int</span>(<span class="string">&quot;0000&quot;</span> + <span class="string">&quot;&quot;</span>.join(binStr), <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 从二进制序列里提取int值， 丢弃每个字节的最高位, 可以配合着getLengthStr函数一起看</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">getLength</span>(<span class="params">buf: <span class="built_in">bytes</span></span>) -&gt; <span class="built_in">int</span>:</span><br><span class="line">  t = <span class="number">0</span></span><br><span class="line">  i = <span class="built_in">len</span>(buf)</span><br><span class="line">  n = <span class="number">0</span></span><br><span class="line">  <span class="keyword">for</span> b <span class="keyword">in</span> buf:</span><br><span class="line">    i -= <span class="number">1</span></span><br><span class="line">    n = <span class="number">128</span> ** i</span><br><span class="line">    t += b * n</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> t</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 解析id3v2</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">readId3</span>(<span class="params">path: <span class="built_in">str</span></span>) -&gt; <span class="built_in">dict</span>:</span><br><span class="line">  tag = &#123;TITLE: <span class="string">&quot;*&quot;</span>, ARTIST: <span class="string">&quot;*&quot;</span>, ALBUM: <span class="string">&quot;*&quot;</span>, YEAR: <span class="string">&quot;*&quot;</span>&#125;</span><br><span class="line">  buffer: <span class="built_in">bytes</span></span><br><span class="line">  <span class="keyword">try</span>:</span><br><span class="line">    fp = <span class="built_in">open</span>(path, <span class="string">&quot;rb&quot;</span>)</span><br><span class="line">    buffer = fp.read()</span><br><span class="line">    fp.close()</span><br><span class="line">    <span class="keyword">if</span> buffer[: <span class="number">3</span>].decode() != <span class="string">&quot;ID3&quot;</span>:</span><br><span class="line">      <span class="keyword">raise</span> Exception(<span class="string">&quot;NotSupportFile&quot;</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">except</span>:</span><br><span class="line">    <span class="keyword">return</span> tag</span><br><span class="line"></span><br><span class="line">  <span class="comment"># 定位第一个id3信息块</span></span><br><span class="line">  pos = <span class="number">10</span></span><br><span class="line">  <span class="comment"># 获取所有信息块的大小， 不包括开头的10字节的标签头, id3v2标准规定大小为28bit整数， 占用每个字节的低7bit</span></span><br><span class="line">  <span class="comment"># 所以需要丢弃最高位</span></span><br><span class="line">  length = getLength(buffer[<span class="number">6</span>: <span class="number">10</span>])</span><br><span class="line">  <span class="comment"># 验证我们的二进制运算对不对</span></span><br><span class="line">  <span class="comment">#assert(length == getLengthStr(buffer[6: 10]))</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># 开始处理每个信息块</span></span><br><span class="line">  <span class="keyword">while</span> pos &lt; length + <span class="number">10</span>:</span><br><span class="line">    <span class="comment"># 获取当前信息块大小， 这里不用丢弃最高位</span></span><br><span class="line">    fieldLength: <span class="built_in">int</span> = struct.unpack(<span class="string">&quot;&gt;i&quot;</span>, buffer[pos + <span class="number">4</span>: pos + <span class="number">8</span>])[<span class="number">0</span>]</span><br><span class="line">    <span class="keyword">if</span> fieldLength &gt;= <span class="number">1</span>:</span><br><span class="line">      <span class="comment"># 获取每个信息块的名称大小和实际内容</span></span><br><span class="line">      name: <span class="built_in">str</span> = decode(buffer[pos: pos + <span class="number">4</span>])</span><br><span class="line">      tagBuf: <span class="built_in">bytes</span> = buffer[pos + <span class="number">11</span>: pos + <span class="number">10</span> + fieldLength]</span><br><span class="line">      value = decode(tagBuf)</span><br><span class="line">      <span class="comment"># 匹配歌曲的标题 艺术家 专辑 和 年份</span></span><br><span class="line">      <span class="keyword">if</span> name ==  TITLE <span class="keyword">or</span> ARTIST <span class="keyword">or</span> ALBUM <span class="keyword">or</span> YEAR:</span><br><span class="line">        tag[name] = value</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 定位下一个信息块</span></span><br><span class="line">    pos += fieldLength + <span class="number">10</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> tag</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">  path: <span class="built_in">str</span></span><br><span class="line">  <span class="keyword">if</span> <span class="built_in">len</span>(sys.argv) &gt; <span class="number">1</span>:</span><br><span class="line">    path = sys.argv[<span class="number">1</span>]</span><br><span class="line">  <span class="keyword">else</span>:</span><br><span class="line">    path = <span class="string">&quot;D:/music/music1&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> p <span class="keyword">in</span> os.listdir(path):</span><br><span class="line">    fullPath = os.path.join(path, p)</span><br><span class="line">    <span class="keyword">if</span> os.path.isfile(fullPath) <span class="keyword">and</span> p[-<span class="number">3</span>: ].lower() == <span class="string">&quot;mp3&quot;</span>:</span><br><span class="line">      tag = readId3(fullPath)</span><br><span class="line">      <span class="built_in">print</span>(<span class="string">&quot;&#123;&#125; &#123;&#125; &#123;&#125; &#123;&#125;&quot;</span>.<span class="built_in">format</span>(tag[TITLE], tag[ARTIST], tag[ALBUM], tag[YEAR]))</span><br></pre></td></tr></table></figure>
+
+<p>  因为文本编码过于繁杂， 这个解析工具效果不是特别好， 不过写程序么， 只要能解决绝大多数的问题也就达到了目的…… </p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%8E%9F%E5%88%9B/" rel="tag"># 原创</a>
+              <a href="/tags/mp3/" rel="tag"># mp3</a>
+              <a href="/tags/ID3/" rel="tag"># ID3</a>
+              <a href="/tags/%E6%96%87%E6%9C%AC%E7%BC%96%E7%A0%81/" rel="tag"># 文本编码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/19/mp3id3v2parser-I/" rel="prev" title="mp3标签解析和字节序 （上）">
+      <i class="fa fa-chevron-left"></i> mp3标签解析和字节序 （上）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#mp3%E6%96%87%E4%BB%B6%E7%9A%84%E6%A0%87%E7%AD%BE%E5%92%8C%E5%AD%97%E8%8A%82%E5%AD%98%E5%8F%96%E9%A1%BA%E5%BA%8F-%E4%B8%8B"><span class="nav-number">1.</span> <span class="nav-text">mp3文件的标签和字节存取顺序 下</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8%E7%9C%8BID3V2"><span class="nav-number">1.1.</span> <span class="nav-text">在看ID3V2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-number">1.2.</span> <span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4python%E4%BB%A3%E7%A0%81"><span class="nav-number">1.3.</span> <span class="nav-text">完整python代码</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
