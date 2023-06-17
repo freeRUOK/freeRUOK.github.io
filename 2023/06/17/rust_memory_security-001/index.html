@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"freeruok.github.io","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"copycode":{"enable":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="rust内存安全系列文章">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rust内存安全 - 01.所有权和借用初印象">
+<meta property="og:url" content="https://freeruok.github.io/2023/06/17/rust_memory_security-001/index.html">
+<meta property="og:site_name" content="Free R U Ok">
+<meta property="og:description" content="rust内存安全系列文章">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-06-17T13:40:00.000Z">
+<meta property="article:modified_time" content="2023-06-17T09:36:33.444Z">
+<meta property="article:author" content="freeRUOK">
+<meta property="article:tag" content="rust">
+<meta property="article:tag" content="内存安全">
+<meta property="article:tag" content="所有权">
+<meta property="article:tag" content="借用">
+<meta property="article:tag" content="生命周期标注">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://freeruok.github.io/2023/06/17/rust_memory_security-001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>rust内存安全 - 01.所有权和借用初印象 | Free R U Ok</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Free R U Ok</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">一个孤独人的所思所想</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-schedule">
+
+    <a href="/schedule/" rel="section"><i class="fa fa-calendar fa-fw"></i>日程表</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://freeruok.github.io/2023/06/17/rust_memory_security-001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="freeRUOK">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Free R U Ok">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          rust内存安全 - 01.所有权和借用初印象
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-06-17 21:40:00 / 修改时间：17:36:33" itemprop="dateCreated datePublished" datetime="2023-06-17T21:40:00+08:00">2023-06-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/rust%E5%86%85%E5%AD%98%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">rust内存安全</span></a>
+                </span>
+            </span>
+
+          
+            <div class="post-description">rust内存安全系列文章</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="rust所有权和借用初印象"><a href="#rust所有权和借用初印象" class="headerlink" title="rust所有权和借用初印象"></a>rust所有权和借用初印象</h2><p>  我们喜欢研究各种编程语言的特性， 并且为此乐此不疲， 但是突然某一天遇见了rust这样一个与众不同的语言， 而且发现以前那些屡试不爽的法术既然玩不转了！  </p>
+<h3 id="从一个最简单的场景开始"><a href="#从一个最简单的场景开始" class="headerlink" title="从一个最简单的场景开始"></a>从一个最简单的场景开始</h3><p>  现在我们有个简单的js程序， 比较两个用户的用户名长度和用户年龄大小， 最后输出了用户名较长和用户年龄较大的用户信息。  </p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">User</span>(<span class="params">name, age</span>) &#123;</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">name</span> = name</span><br><span class="line">  <span class="variable language_">this</span>.<span class="property">age</span> = age</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">nameLen</span>(<span class="params">u1, u2</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> u1.<span class="property">name</span>.<span class="property">length</span> &gt;= u2.<span class="property">name</span>.<span class="property">length</span>? <span class="attr">u1</span>: u2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ageMax</span>(<span class="params">u1, u2</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> u1.<span class="property">age</span> &gt;= u2.<span class="property">age</span>? <span class="attr">u1</span>: u2;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> user1 = <span class="keyword">new</span> <span class="title class_">User</span>(<span class="string">&quot;admin&quot;</span>, <span class="number">38</span>)</span><br><span class="line"><span class="keyword">const</span> user2 = <span class="keyword">new</span> <span class="title class_">User</span>(<span class="string">&quot;a007&quot;</span>, <span class="number">45</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> nameResult = <span class="title function_">nameLen</span>(user1, user2)</span><br><span class="line"><span class="keyword">const</span> ageResult = <span class="title function_">ageMax</span>(user1, user2)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(nameResult)</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(ageResult)</span><br></pre></td></tr></table></figure>
+
+<p>  整个程序没啥好说的， 也按照我们的预期运行了， 如果把这样的程序用rust改写的话遇到好几个困难。  </p>
+<h3 id="出师不利"><a href="#出师不利" class="headerlink" title="出师不利"></a>出师不利</h3><p>  首先我们直接用rust语法改写上面的程序， 如下所示：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 定义user结构体， 自动实现Debug Trait， 这样可以用&quot;&#123;:?&#125;&quot;输出结构体</span></span><br><span class="line"># [<span class="title function_ invoke__">derive</span>(<span class="built_in">Debug</span>)]</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  name: <span class="type">String</span>, </span><br><span class="line">  age: <span class="type">u8</span>, </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实现一个User关联函数</span></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  <span class="keyword">fn</span> <span class="title function_">new</span>(name: &amp;<span class="type">str</span>, age: <span class="type">u8</span>) <span class="punctuation">-&gt;</span> <span class="keyword">Self</span> &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="variable">name</span> = <span class="type">String</span>::<span class="title function_ invoke__">from</span>(name);</span><br><span class="line">    User&#123;name, age&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">name_len</span>(u1: User, u2: User) <span class="punctuation">-&gt;</span> User &#123;</span><br><span class="line">  <span class="keyword">if</span> u1.name.<span class="title function_ invoke__">len</span>() &gt;= u2.name.<span class="title function_ invoke__">len</span>() &#123; u1 &#125; <span class="keyword">else</span> &#123; u2 &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">age_max</span>(u1: User, u2: User) <span class="punctuation">-&gt;</span> User &#123;</span><br><span class="line">  <span class="keyword">if</span> u1.age &gt;= u2.age &#123; u1 &#125; <span class="keyword">else</span> &#123; u2 &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">user1</span> = User::<span class="title function_ invoke__">new</span>(<span class="string">&quot;admin&quot;</span>, <span class="number">38</span>);</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">user2</span> = User::<span class="title function_ invoke__">new</span>(<span class="string">&quot;a007&quot;</span>, <span class="number">45</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> <span class="variable">name_result</span> = <span class="title function_ invoke__">name_len</span>(user1, user2);</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">age_max</span> = <span class="title function_ invoke__">age_max</span>(user1, user2);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, name_result);</span><br><span class="line">  <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, age_max);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  原以为一切刚刚好， 编译肯定是马到成功， 可惜一大坨编译器报错， 不过编译器输出的东西有干货， 这rust编译器和那些传统的编译器不是一个概念。  </p>
+<p>  所以请你认真阅读编译器的输出， 抄录如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$rustc</span> user.rs</span><br><span class="line">error[E0382]: use of moved value: `user1`</span><br><span class="line">  --&gt; user.rs:29:25</span><br><span class="line">   |</span><br><span class="line">25 |   <span class="built_in">let</span> user1 = User::new(<span class="string">&quot;admin&quot;</span>, 38);</span><br><span class="line">   |       ----- move occurs because `user1` has <span class="built_in">type</span> `User`, <span class="built_in">which</span> does not implement the `Copy` trait</span><br><span class="line">...</span><br><span class="line">28 |   <span class="built_in">let</span> name_result = name_len(user1, user2);</span><br><span class="line">   |                              ----- value moved here</span><br><span class="line">29 |   <span class="built_in">let</span> age_max = age_max(user1, user2);</span><br><span class="line">   |                         ^^^^^ value used here after move</span><br><span class="line">........</span><br><span class="line">error: aborting due to 2 previous errors</span><br><span class="line"></span><br><span class="line">For more information about this error, try `rustc --explain E0382`.</span><br></pre></td></tr></table></figure>
+
+<p>  桌子上有一个美味的鸡腿， 第一个人直接拿走吃掉了， 那么很显然第二个人是不是扑空了！  </p>
+<p>  name_len函数捷足先登已经拿走了user1和user2， 然后age_max函数如法炮制的时候发现已经没了。  </p>
+<p>  这样的情况在js， python， java， C# 里不存在的， 第二个函数肯定能正常使用user1和user2， 因为有GC默默的承担了其中的任何风险。  </p>
+<p>  如果换成C&#x2F;C++的话就看第一个函数的心情了， 如果第一个函数心情美丽那么轮到第二个函数的时候不会出问题， </p>
+<p>  如果第一个函数心情糟糕一怒之下调用了一下free销毁user1和user2的话， 那么第二个函数分分钟给你脸色看， 所谓悬垂指针就是这样做出来的。  </p>
+<p>  问题的症结就是谁能保证第一个函数不能胡作非为？ 那肯定是GC啊， 人家GC说了， 第一个函数你可以乱发脾气， 但是不要动不动就摔盘子摔碗，  </p>
+<p>  GC还说， 为了保险起见销毁任务交给我吧， 那么c&#x2F;c++没有GC只能好声好气的天天哄着第一个函数，<br>只能尽量的不让第一个函数乱来。</p>
+<p>  这个时候rust跳出来对第一个函数说， 东西都给你， 你随便折腾， 这样第二个函数没东西用直接哭晕在厕所啦……  </p>
+<h3 id="所有权"><a href="#所有权" class="headerlink" title="所有权"></a>所有权</h3><p>  这个行为在rust里叫move， 这样我们传说中的所有权就粉墨登场了！  </p>
+<p>  这里本来属于main函数的user1和user2被移动到了name_len函数， 房子从main过户到了name_len， 这样后来的age_max就没办法了不是。  </p>
+<p>  专业术语叫所有权转移， 本来属于main的所有权被转移到了name_len。  </p>
+<p>  我怀揣一万块招摇过市， 遭遇歹徒了， 请问我如何保证怀里的一万块？ 答曰仿造一万块。  </p>
+<p>  这是修改后的程序。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 定义user结构体， 自动实现Debug和Clone Trait， 这样可以用&quot;&#123;:?&#125;&quot;输出结构体， 显示调用clone方法克隆结构体</span></span><br><span class="line"># [<span class="title function_ invoke__">derive</span>(<span class="built_in">Debug</span>, <span class="built_in">Clone</span>)]</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  name: <span class="type">String</span>, </span><br><span class="line">  age: <span class="type">u8</span>, </span><br><span class="line">&#125;</span><br><span class="line">........</span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">user1</span> = User::<span class="title function_ invoke__">new</span>(<span class="string">&quot;admin&quot;</span>, <span class="number">38</span>);</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">user2</span> = User::<span class="title function_ invoke__">new</span>(<span class="string">&quot;a007&quot;</span>, <span class="number">45</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> <span class="variable">name_result</span> = <span class="title function_ invoke__">name_len</span>(user1.<span class="title function_ invoke__">clone</span>(), user2.<span class="title function_ invoke__">clone</span>());</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">age_max</span> = <span class="title function_ invoke__">age_max</span>(user1, user2);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, name_result);</span><br><span class="line">  <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, age_max);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  这样克隆的话不会出现所有权转移， 编译运行完美！  </p>
+<p>  但是问题被掩盖了， user也就两个字段用clone也无可厚非， 但是当有一天user膨胀了呢？ 那个时候动不动就克隆， 那么我们也没必要折腾rust了。  </p>
+<p>  java C# 它不香么？  </p>
+<p>  其实我们遇到劫匪可以协商的吗！ 双方坐下来谈一谈， 老哥要不我把怀里的一万块借给你如何？ 小老弟呀你可能对劫匪的认知有偏差  </p>
+<h3 id="借用"><a href="#借用" class="headerlink" title="借用"></a>借用</h3><p>  main可以把user1和user2借给其他函数， 这样能避免所有权转移， 只是里面的借用检查是绕不过去的坎！  </p>
+<p>  接下来我们暂时离开主线任务， 挑战一个冒泡排序的分叉任务， 借此机会看看借用和引用语法。  </p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">sort</span>(ary: &amp;<span class="keyword">mut</span> [<span class="type">i32</span>]) &#123;</span><br><span class="line">  <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="number">0</span>..ary.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">    <span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> (i + <span class="number">1</span>)..ary.<span class="title function_ invoke__">len</span>() &#123;</span><br><span class="line">      <span class="keyword">if</span> ary[i] &gt; ary[j] &#123;</span><br><span class="line">        <span class="keyword">let</span> <span class="variable">tmp</span> = ary[i];</span><br><span class="line">        ary[i] = ary[j];</span><br><span class="line">        ary[j] = tmp;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">print</span>(ary: &amp;[<span class="type">i32</span>]) &#123;</span><br><span class="line">  ary.<span class="title function_ invoke__">iter</span>().<span class="title function_ invoke__">for_each</span>(|e| </span><br><span class="line">    <span class="built_in">print!</span>(<span class="string">&quot;&#123;&#125;, &quot;</span>, e));</span><br><span class="line">  <span class="built_in">println!</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="keyword">let</span> <span class="keyword">mut </span><span class="variable">ls</span> = [<span class="number">34</span>, <span class="number">31</span>, <span class="number">90</span>, <span class="number">0</span>, <span class="number">25</span>, <span class="number">13</span>, <span class="number">7</span>, <span class="number">28</span>, <span class="number">80</span>, <span class="number">2</span>, <span class="number">34</span>, <span class="number">72</span>, <span class="number">37</span>, <span class="number">31</span>, <span class="number">11</span>, <span class="number">10</span>];</span><br><span class="line">  <span class="title function_ invoke__">sort</span>(&amp;<span class="keyword">mut</span> ls);</span><br><span class="line">  <span class="title function_ invoke__">print</span>(&amp;ls);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  这是一个朴实无华的冒泡排序算法， 使用了借用语法， 主要关注两个函数的签名。  </p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">sort</span>(ary: &amp;<span class="keyword">mut</span> [<span class="type">i32</span>]);</span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">print</span>(ary: &amp;[<span class="type">i32</span>]);</span><br></pre></td></tr></table></figure>
+
+<p>  两个函数都借用某个i32类型的切片大差不差， 区别在于想要修改值就加上mut关键字。  </p>
+<p>  看完借用语法后改造我们的主程序， 去掉克隆改用引用。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"># [<span class="title function_ invoke__">derive</span>(<span class="built_in">Debug</span>)]</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  name: <span class="type">String</span>, </span><br><span class="line">  age: <span class="type">u8</span>, </span><br><span class="line">&#125;</span><br><span class="line">........</span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">name_len</span>(u1: &amp;User, u2: &amp;User) <span class="punctuation">-&gt;</span> &amp;User &#123;</span><br><span class="line">  <span class="keyword">if</span> u1.name.<span class="title function_ invoke__">len</span>() &gt;= u2.name.<span class="title function_ invoke__">len</span>() &#123; u1 &#125; <span class="keyword">else</span> &#123; u2 &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">age_max</span>(u1: &amp;User, u2: &amp;User) <span class="punctuation">-&gt;</span> &amp;User &#123;</span><br><span class="line">  <span class="keyword">if</span> u1.age &gt;= u2.age &#123; u1 &#125; <span class="keyword">else</span> &#123; u2 &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">main</span>() &#123;</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">user1</span> = User::<span class="title function_ invoke__">new</span>(<span class="string">&quot;admin&quot;</span>, <span class="number">38</span>);</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">user2</span> = User::<span class="title function_ invoke__">new</span>(<span class="string">&quot;a007&quot;</span>, <span class="number">45</span>);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> <span class="variable">name_result</span> = <span class="title function_ invoke__">name_len</span>(&amp;user1, &amp;user2);</span><br><span class="line">  <span class="keyword">let</span> <span class="variable">age_max</span> = <span class="title function_ invoke__">age_max</span>(&amp;user1, &amp;user2);</span><br><span class="line"></span><br><span class="line">  <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, name_result);</span><br><span class="line">  <span class="built_in">println!</span>(<span class="string">&quot;&#123;:?&#125;&quot;</span>, age_max);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>  为什么rust编译器被称为良师益友， 原因在抄录的报错输出。  </p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ rustc test92.rs</span><br><span class="line">error[E0106]: missing lifetime specifier</span><br><span class="line">  --&gt; test92.rs:15:38</span><br><span class="line">   |</span><br><span class="line">15 | fn name_len(u1: &amp;User, u2: &amp;User) -&gt; &amp;User &#123;</span><br><span class="line">   |                 -----      -----     ^ expected named lifetime parameter</span><br><span class="line">   |</span><br><span class="line">   = <span class="built_in">help</span>: this <span class="keyword">function</span><span class="string">&#x27;s return type contains a borrowed value, but the signature does not say whether it is borrowed from `u1` or `u2`</span></span><br><span class="line"><span class="string">help: consider introducing a named lifetime parameter</span></span><br><span class="line"><span class="string">   |</span></span><br><span class="line"><span class="string">15 | fn name_len&lt;&#x27;</span>a&gt;(u1: &amp;<span class="string">&#x27;a User, u2: &amp;&#x27;</span>a User) -&gt; &amp;<span class="string">&#x27;a User &#123;</span></span><br><span class="line"><span class="string">   |            ++++      ++            ++           ++</span></span><br><span class="line"><span class="string">........</span></span><br><span class="line"><span class="string">error: aborting due to 2 previous errors</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">For more information about this error, try `rustc --explain E0106`.</span></span><br></pre></td></tr></table></figure>
+
+<p>  根据编译器的提示照葫芦画瓢， 如下：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">........</span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">name_len</span>&lt;<span class="symbol">&#x27;a</span>&gt;(u1: &amp; <span class="symbol">&#x27;a</span> User, u2: &amp; <span class="symbol">&#x27;a</span> User) <span class="punctuation">-&gt;</span> &amp; <span class="symbol">&#x27;a</span> User &#123;</span><br><span class="line">  <span class="keyword">if</span> u1.name.<span class="title function_ invoke__">len</span>() &gt;= u2.name.<span class="title function_ invoke__">len</span>() &#123; u1 &#125; <span class="keyword">else</span> &#123; u2 &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">age_max</span>&lt;<span class="symbol">&#x27;a</span>&gt;(u1: &amp; <span class="symbol">&#x27;a</span> User, u2: &amp; <span class="symbol">&#x27;a</span> User) <span class="punctuation">-&gt;</span> &amp; <span class="symbol">&#x27;a</span> User &#123;</span><br><span class="line">  <span class="keyword">if</span> u1.age &gt;= u2.age &#123; u1 &#125; <span class="keyword">else</span> &#123; u2 &#125;</span><br><span class="line">&#125;</span><br><span class="line">........</span><br></pre></td></tr></table></figure>
+
+<p>  Ok一切很完美， 不过这个有点像魔法， ‘a 是个什么鬼？  </p>
+<h3 id="生命周期标注和借用检查"><a href="#生命周期标注和借用检查" class="headerlink" title="生命周期标注和借用检查"></a>生命周期标注和借用检查</h3><p>  我二十世纪九十年代生人， 那么我的生命周期从二十世纪的九十年代到二十一世纪的七十年代， 当然有可能被提前drop掉， 那么某个内存里的数据也是如此， 这些数据生存在某个词法作用域里， 大白话讲的话就是在某个花括号里。  </p>
+<p>  这里不讨论rust里的所有权转移和人类的穿越时空， 就说说某个作用域。  </p>
+<p>  我们的user1和user2生存在main函数的作用域里， main函数执行到尾声那么这两个数据也会随机被清理， 但是这里我们的两个函数都借用了user1和user2， 并且返回了某个引用， 也许是user1的引用也许是user2的引用？  </p>
+<p>  这个时候我们人类知道user1和user2的生命周期的， 也能推断两个函数返回的两个引用的生命周期， </p>
+<p>  user1和user2是一个拥有所有权的变量， 而name_result和age_result这两个引用只是某个引用而已， 而rust要求不能存在无效引用。  </p>
+<p>  如果user1和user2被清理了， 那么name_result和age_result这两个变成悬垂指针了。  </p>
+<p>  但是我们人类知道这里不会出现悬垂指针， 不过编译器是不确定的， 所以我们用那样一个语法告诉编译器， 编译器老哥放心好了， 我人类保证这里没有任何问题， 你所担心的悬垂指针不会出现的！  </p>
+<p>  实际上借用检查器已经帮助人类做了不少的事情， 就像数据类型推断一样很多借用也是可以推断的， 以后可能手动标注生命周期参数的机会越来越少的。  </p>
+<p>  那么这个：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">fn</span> <span class="title function_">name_len</span>&lt;<span class="symbol">&#x27;a</span>&gt;(u1: &amp; <span class="symbol">&#x27;a</span> User, u2: &amp; <span class="symbol">&#x27;a</span> User) <span class="punctuation">-&gt;</span> &amp; <span class="symbol">&#x27;a</span> User;</span><br></pre></td></tr></table></figure>
+<p>  意思是u1和u2两个参数和返回类型的生命周期都一样一样的。  </p>
+<p>  最后的总结rust的所有权和借用这些概念非常巧妙的不引入GC的情况下解决了内存安全问题， 三大内存安全隐患内存泄漏， 悬垂指针和重复释放。  </p>
+<p>  只要能够把握核心关键点不至于在纷繁复杂的语法规则里迷失……</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/rust/" rel="tag"># rust</a>
+              <a href="/tags/%E5%86%85%E5%AD%98%E5%AE%89%E5%85%A8/" rel="tag"># 内存安全</a>
+              <a href="/tags/%E6%89%80%E6%9C%89%E6%9D%83/" rel="tag"># 所有权</a>
+              <a href="/tags/%E5%80%9F%E7%94%A8/" rel="tag"># 借用</a>
+              <a href="/tags/%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%87%E6%B3%A8/" rel="tag"># 生命周期标注</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/05/27/mp3id3v2parser-II/" rel="prev" title="mp3标签解析和字节序 （下）">
+      <i class="fa fa-chevron-left"></i> mp3标签解析和字节序 （下）
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#rust%E6%89%80%E6%9C%89%E6%9D%83%E5%92%8C%E5%80%9F%E7%94%A8%E5%88%9D%E5%8D%B0%E8%B1%A1"><span class="nav-number">1.</span> <span class="nav-text">rust所有权和借用初印象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%8E%E4%B8%80%E4%B8%AA%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E5%9C%BA%E6%99%AF%E5%BC%80%E5%A7%8B"><span class="nav-number">1.1.</span> <span class="nav-text">从一个最简单的场景开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%BA%E5%B8%88%E4%B8%8D%E5%88%A9"><span class="nav-number">1.2.</span> <span class="nav-text">出师不利</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%80%E6%9C%89%E6%9D%83"><span class="nav-number">1.3.</span> <span class="nav-text">所有权</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%80%9F%E7%94%A8"><span class="nav-number">1.4.</span> <span class="nav-text">借用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%A0%87%E6%B3%A8%E5%92%8C%E5%80%9F%E7%94%A8%E6%A3%80%E6%9F%A5"><span class="nav-number">1.5.</span> <span class="nav-text">生命周期标注和借用检查</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">freeRUOK</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">24</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">67</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">freeRUOK</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
